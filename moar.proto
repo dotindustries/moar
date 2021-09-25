@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package moarpb;
+
+option go_package = "github.com/nadilas/moar/moarpb";
+
+service ModuleRegistry {
+  rpc GetUrl(GetUrlRequest) returns (GetUrlResponse);
+  rpc CreateModule(CreateModuleRequest) returns (CreateModuleResponse);
+  rpc DeleteModule(DeleteModuleRequest) returns (DeleteModuleResponse);
+  rpc UploadVersion(UploadVersionRequest) returns (UploadVersionResponse);
+  rpc DeleteVersion(DeleteVersionRequest) returns (DeleteVersionResponse);
+}
+
+message GetUrlRequest {
+  string moduleName = 1;
+  oneof versionSelector {
+    string versionConstraint = 2;
+    string version = 3;
+  }
+}
+
+message GetUrlResponse {
+  string uri = 1;
+  Module module = 2;
+  string selectedVersion = 3;
+}
+
+message CreateModuleRequest {
+  string moduleName = 1;
+  string author = 2;
+}
+
+message CreateModuleResponse {
+
+}
+
+message DeleteModuleRequest {
+  string moduleName = 1;
+}
+
+message DeleteModuleResponse {
+
+}
+
+message UploadVersionRequest {
+  string moduleName = 1;
+  string version = 2;
+  bytes fileData = 3;
+}
+
+message UploadVersionResponse {
+
+}
+
+message DeleteVersionRequest {
+  string moduleName = 1;
+  string version = 2;
+}
+
+message DeleteVersionResponse {
+
+}
+
+message Module {
+  string name = 1;
+  repeated string versions = 2;
+}

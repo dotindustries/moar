@@ -1,0 +1,251 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "title": "moar.proto",
+    "version": "version not set"
+  },
+  "host": "localhost:8000",
+  "paths": {
+    "/twirp/moarpb.ModuleRegistry/CreateModule": {
+      "post": {
+        "tags": [
+          "ModuleRegistry"
+        ],
+        "operationId": "CreateModule",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/moarpbCreateModuleRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/moarpbCreateModuleResponse"
+            }
+          }
+        }
+      }
+    },
+    "/twirp/moarpb.ModuleRegistry/DeleteModule": {
+      "post": {
+        "tags": [
+          "ModuleRegistry"
+        ],
+        "operationId": "DeleteModule",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/moarpbDeleteModuleRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/moarpbDeleteModuleResponse"
+            }
+          }
+        }
+      }
+    },
+    "/twirp/moarpb.ModuleRegistry/DeleteVersion": {
+      "post": {
+        "tags": [
+          "ModuleRegistry"
+        ],
+        "operationId": "DeleteVersion",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/moarpbDeleteVersionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/moarpbDeleteVersionResponse"
+            }
+          }
+        }
+      }
+    },
+    "/twirp/moarpb.ModuleRegistry/GetUrl": {
+      "post": {
+        "tags": [
+          "ModuleRegistry"
+        ],
+        "operationId": "GetUrl",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/moarpbGetUrlRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/moarpbGetUrlResponse"
+            }
+          }
+        }
+      }
+    },
+    "/twirp/moarpb.ModuleRegistry/UploadVersion": {
+      "post": {
+        "tags": [
+          "ModuleRegistry"
+        ],
+        "operationId": "UploadVersion",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/moarpbUploadVersionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/moarpbUploadVersionResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "moarpbCreateModuleRequest": {
+      "description": "Fields: moduleName, author",
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string"
+        },
+        "moduleName": {
+          "type": "string"
+        }
+      }
+    },
+    "moarpbCreateModuleResponse": {
+      "type": "object"
+    },
+    "moarpbDeleteModuleRequest": {
+      "description": "Fields: moduleName",
+      "type": "object",
+      "properties": {
+        "moduleName": {
+          "type": "string"
+        }
+      }
+    },
+    "moarpbDeleteModuleResponse": {
+      "type": "object"
+    },
+    "moarpbDeleteVersionRequest": {
+      "description": "Fields: moduleName, version",
+      "type": "object",
+      "properties": {
+        "moduleName": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "moarpbDeleteVersionResponse": {
+      "type": "object"
+    },
+    "moarpbGetUrlRequest": {
+      "description": "Fields: moduleName",
+      "type": "object",
+      "properties": {
+        "moduleName": {
+          "type": "string"
+        }
+      }
+    },
+    "moarpbGetUrlResponse": {
+      "description": "Fields: uri, module, selectedVersion",
+      "type": "object",
+      "properties": {
+        "module": {
+          "$ref": "#/definitions/moarpbModule"
+        },
+        "selectedVersion": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string"
+        }
+      }
+    },
+    "moarpbModule": {
+      "description": "Fields: name, versions",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "moarpbUploadVersionRequest": {
+      "description": "Fields: moduleName, version, fileData",
+      "type": "object",
+      "properties": {
+        "fileData": {
+          "$ref": "#/definitions/moarpbbytes"
+        },
+        "moduleName": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "moarpbUploadVersionResponse": {
+      "type": "object"
+    }
+  }
+}
