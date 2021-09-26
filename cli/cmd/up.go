@@ -20,6 +20,7 @@ import (
 
 var (
 	moduleStorageType string
+	storageAddress    string
 	host              string
 )
 
@@ -32,7 +33,7 @@ var upCmd = &cobra.Command{
 		// case "etcd":
 		// moduleStorage = internal.NewDatabase()
 		case "s3":
-			moduleStorage = s32.New()
+			moduleStorage = s32.New(storageAddress)
 		default:
 			logrus.Fatalf("invalid module storage type: '%s'", moduleStorageType)
 		}
@@ -54,6 +55,7 @@ var upCmd = &cobra.Command{
 
 func init() {
 	upCmd.Flags().StringVar(&moduleStorageType, "storage_type", "s3", "Defines what storage type to use. Possible values: s3")
+	upCmd.Flags().StringVar(&storageAddress, "storage_addr", "localhost:9000", "The address to reach the storage")
 	upCmd.Flags().StringVar(&host, "host", ":8000", "The address to bind the server to")
 	rootCmd.AddCommand(upCmd)
 }

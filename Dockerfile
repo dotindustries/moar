@@ -33,7 +33,7 @@ WORKDIR /root/
 COPY --from=builder /moar/moar .
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 EXPOSE 8000
-ENTRYPOINT ["./moar", "up", "-d"]
+CMD ["./moar", "up", "-d"]
 
 # build requested image
 FROM moar-${TARGET}

@@ -23,9 +23,11 @@ type Storage struct {
 	logger      *logrus.Entry
 }
 
-func New() *Storage {
+func New(endpoint string) *Storage {
 	logger := logrus.WithField("op", "storage")
-	endpoint := "localhost:9000"
+	if endpoint == "" {
+		endpoint = "localhost:9000"
+	}
 	accessKeyID := "minio"
 	secretAccessKey := "minio123"
 	useSSL := false

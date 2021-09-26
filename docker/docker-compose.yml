@@ -65,6 +65,11 @@ services:
   moar:
     image: nadilas/moar-registry
     hostname: moar
+    command:
+      - ./moar
+      - up
+      - -d
+      - --storage_addr=nginx:9000
     ports:
       - "8000:8000"
     depends_on:
