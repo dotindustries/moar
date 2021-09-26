@@ -11,7 +11,7 @@ import (
 )
 
 type Reader interface {
-	UriForModule(ctx context.Context, module string, version string) (string, error)
+	UriForModule(ctx context.Context, module string, version string) (*internal.VersionResources, error)
 	GetModule(ctx context.Context, name string) (*internal.Module, error)
 	Close() error
 }
@@ -19,7 +19,7 @@ type Reader interface {
 type Writer interface {
 	PutModule(ctx context.Context, module *internal.Module) error
 	RemoveModule(ctx context.Context, name string) error
-	PutVersion(ctx context.Context, module string, version string, data []byte) error
+	PutVersion(ctx context.Context, module string, version string, data []byte, styleData []byte) error
 	RemoveVersion(ctx context.Context, module string, version string) error
 }
 
@@ -59,9 +59,9 @@ func (s *Service) DeleteModule(ctx context.Context, module *internal.Module) err
 	return s.storage.RemoveModule(ctx, module.Name)
 }
 
-func (s *Service) UploadVersion(ctx context.Context, module *internal.Module, version *semver.Version, data []byte) error {
+func (s *Service) UploadVersion(ctx context.Context, module *internal.Module, version *semver.Version, data []byte, styleData []byte) error {
 	// upload version
-	err := s.storage.PutVersion(ctx, module.Name, version.String(), data)
+	err := s.storage.PutVersion(ctx, module.Name, version.String(), data, styleData)
 	if err != nil {
 		return err
 	}
@@ -92,16 +92,27 @@ func (s *Service) DeleteVersion(ctx context.Context, module *internal.Module, ve
 
 // UriForModule finds the public URI for a module. If a version has been previously selected, that version is used, otherwise
 // this function defaults to the latest version of the module
-func (s *Service) UriForModule(ctx context.Context, module *internal.Module) (string, error) {
+func (s *Service) UriForModule(ctx context.Context, module *internal.Module) (*internal.VersionResources, error) {
 	v := module.SelectedVersion()
 	if v == nil {
 		v = module.Latest()
 	}
-	uri, err := s.storage.UriForModule(ctx, module.Name, v.String())
+	vResources, err := s.storage.UriForModule(ctx, module.Name, v.String())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return fmt.Sprintf("%s/%s", s.reverseProxy, uri), nil
+	scriptUri := ""
+	if vResources.ScriptUri != "" {
+		scriptUri = fmt.Sprintf("%s/%s", s.reverseProxy, vResources.ScriptUri)
+	}
+	styleUri := ""
+	if vResources.StyleUri != "" {
+		styleUri = fmt.Sprintf("%s/%s", s.reverseProxy, vResources.StyleUri)
+	}
+	return &internal.VersionResources{
+		ScriptUri: scriptUri,
+		StyleUri:  styleUri,
+	}, nil
 }
 
 func (s *Service) GetModule(ctx context.Context, name string) (*internal.Module, error) {

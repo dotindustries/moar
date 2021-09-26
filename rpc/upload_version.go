@@ -26,7 +26,7 @@ func (s *Server) UploadVersion(ctx context.Context, request *moarpb.UploadVersio
 		return nil, twirp.InvalidArgumentError("version", "upload not possible: version already exists")
 	}
 
-	err = s.registry.UploadVersion(ctx, module, newVersion, request.FileData)
+	err = s.registry.UploadVersion(ctx, module, newVersion, request.FileData, request.StyleData)
 	if err != nil {
 		return nil, twirp.InternalErrorWith(err)
 	}

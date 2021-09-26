@@ -7,9 +7,18 @@ option go_package = "github.com/nadilas/moar/moarpb";
 service ModuleRegistry {
   rpc GetUrl(GetUrlRequest) returns (GetUrlResponse);
   rpc CreateModule(CreateModuleRequest) returns (CreateModuleResponse);
+  rpc GetModule(GetModuleRequest) returns (GetModuleResponse);
   rpc DeleteModule(DeleteModuleRequest) returns (DeleteModuleResponse);
   rpc UploadVersion(UploadVersionRequest) returns (UploadVersionResponse);
   rpc DeleteVersion(DeleteVersionRequest) returns (DeleteVersionResponse);
+}
+
+message GetModuleRequest {
+  string moduleName = 1;
+}
+
+message GetModuleResponse {
+  Module module = 1;
 }
 
 message GetUrlRequest {
@@ -20,8 +29,13 @@ message GetUrlRequest {
   }
 }
 
+message VersionResources {
+  string scriptUri = 1;
+  string styleUri = 2;
+}
+
 message GetUrlResponse {
-  string uri = 1;
+  VersionResources uri = 1;
   Module module = 2;
   string selectedVersion = 3;
 }
@@ -48,6 +62,7 @@ message UploadVersionRequest {
   string moduleName = 1;
   string version = 2;
   bytes fileData = 3;
+  bytes styleData = 4;
 }
 
 message UploadVersionResponse {
@@ -65,7 +80,12 @@ message DeleteVersionResponse {
 
 message Module {
   string name = 1;
-  repeated string versions = 2;
+  repeated Version versions = 2;
   string author = 3;
   string language = 4;
+}
+
+message Version {
+  string value = 1;
+  VersionResources resources = 2;
 }

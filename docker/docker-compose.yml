@@ -75,6 +75,10 @@ services:
       - "8000:8000"
     depends_on:
       - nginx
+      - minio1
+      - minio2
+      - minio3
+      - minio4
 
 ## By default, this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.

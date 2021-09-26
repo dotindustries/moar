@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/Masterminds/semver"
 	"github.com/nadilas/moar/client"
@@ -24,9 +25,28 @@ var (
 	module      string
 	version     string
 	uploadCmd   = &cobra.Command{
-		Use:   "upload",
-		Short: "Uploads a new module version to the registry",
-		Args:  cobra.ExactArgs(1),
+		Use:     "upload",
+		Short:   "Uploads a new module version to the registry",
+		Aliases: []string{"up"},
+		Args: func(cmd *cobra.Command, args []string) error {
+			min := 1
+			max := 2
+			if len(args) < min || len(args) > max {
+				return fmt.Errorf("accepts between %d and %d arg(s), received %d", min, max, len(args))
+			}
+			// first arg must be .js
+			if !strings.HasSuffix(args[0], ".js") {
+				return fmt.Errorf("first argument must be a javascript file with .js extension. Got: %s", args[0])
+			}
+			if len(args) < 2 {
+				return nil
+			}
+			// second arg if provided must be .css
+			if !strings.HasSuffix(args[1], ".css") {
+				return fmt.Errorf("second argument must be a stylesheet with .css extension. Got: %s", args[1])
+			}
+			return nil
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			ver, err := semver.NewVersion(version)
 			if err != nil {
@@ -36,17 +56,18 @@ var (
 
 			client := protobufClient()
 
-			filePath := args[0]
-			bytes, err := ioutil.ReadFile(filePath)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+			scriptPath := args[0]
+			bytes := MustReadFileBytes(scriptPath)
+			var styleBytes []byte
+			if len(args) == 2 {
+				stylePath := args[1]
+				styleBytes = MustReadFileBytes(stylePath)
 			}
-
 			_, err = client.UploadVersion(context.Background(), &moarpb.UploadVersionRequest{
 				ModuleName: module,
 				Version:    version,
 				FileData:   bytes,
+				StyleData:  styleBytes,
 			})
 
 			if err != nil {
@@ -57,6 +78,15 @@ var (
 		},
 	}
 )
+
+func MustReadFileBytes(path string) []byte {
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return bytes
+}
 
 func protobufClient() moarpb.ModuleRegistry {
 	return client.New(client.Config{Url: backendAddr}, twirp.WithClientPathPrefix(""))

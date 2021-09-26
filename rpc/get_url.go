@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/Masterminds/semver"
+	"github.com/nadilas/moar/internal"
 	"github.com/nadilas/moar/internal/registry"
 	"github.com/nadilas/moar/moarpb"
 	"github.com/twitchtv/twirp"
@@ -30,11 +31,13 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 	}
 
 	var version *semver.Version
+	selectedVersionString := ""
 	switch request.VersionSelector.(type) {
 	case *moarpb.GetUrlRequest_Version:
 		var err error
 		versionString := request.GetVersion()
 		if versionString == "latest" {
+			selectedVersionString = "latest"
 			break
 		}
 		version, err = semver.NewVersion(versionString)
@@ -51,7 +54,9 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 			return nil, twirp.WrapError(twirp.InvalidArgumentError("versionConstraint", "constraint invalid"), err)
 		}
 		version = module.SelectVersion(constraint)
+		selectedVersionString = version.String()
 	default:
+		selectedVersionString = "latest"
 		s.logger.Debugf("Module (%s) version is not specified in query, defaulting to latest", request.ModuleName)
 	}
 
@@ -60,14 +65,37 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 		return nil, twirp.InternalErrorWith(err)
 	}
 
+	mod := moduleToDto(module)
 	return &moarpb.GetUrlResponse{
-		Uri: uri,
-		Module: &moarpb.Module{
-			Name:     module.Name,
-			Author:   module.Author,
-			Language: module.Language,
-			Versions: module.VersionStrings(),
+		Uri: &moarpb.VersionResources{
+			ScriptUri: uri.ScriptUri,
+			StyleUri:  uri.StyleUri,
 		},
-		SelectedVersion: version.String(),
+		Module:          mod,
+		SelectedVersion: selectedVersionString,
 	}, nil
+}
+
+func moduleToDto(module *internal.Module) *moarpb.Module {
+	var versions []*moarpb.Version
+	for _, v := range module.Versions {
+		var res *moarpb.VersionResources
+		if v.Resources != nil {
+			res = &moarpb.VersionResources{
+				ScriptUri: v.Resources.ScriptUri,
+				StyleUri:  v.Resources.StyleUri,
+			}
+		}
+		versions = append(versions, &moarpb.Version{
+			Value:     v.Value,
+			Resources: res,
+		})
+	}
+	mod := &moarpb.Module{
+		Name:     module.Name,
+		Author:   module.Author,
+		Language: module.Language,
+		Versions: versions,
+	}
+	return mod
 }
