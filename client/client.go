@@ -1,9 +1,10 @@
 package client
 
 import (
+	"net/http"
+
 	"github.com/nadilas/moar/moarpb"
 	"github.com/twitchtv/twirp"
-	"net/http"
 )
 
 type Config struct {
@@ -11,7 +12,7 @@ type Config struct {
 	HttpClient *http.Client
 }
 
-// New creates a new protobuf client. If no http client is specified it will fallback to the default http.Client
+// New creates a new protobuf client. If no http client is specified it will fall back to the default http.Client
 func New(config Config, opts ...twirp.ClientOption) moarpb.ModuleRegistry {
 	httpCli := config.HttpClient
 	if httpCli == nil {
@@ -20,7 +21,7 @@ func New(config Config, opts ...twirp.ClientOption) moarpb.ModuleRegistry {
 	return moarpb.NewModuleRegistryProtobufClient(config.Url, httpCli, opts...)
 }
 
-// NewJSON creates a new JSON client. If no http client is specified it will fallback to the default http.Client
+// NewJSON creates a new JSON client. If no http client is specified it will fall back to the default http.Client
 func NewJSON(config Config, opts ...twirp.ClientOption) moarpb.ModuleRegistry {
 	httpCli := config.HttpClient
 	if httpCli == nil {

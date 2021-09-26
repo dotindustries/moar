@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 
 	"github.com/Masterminds/semver"
+	"github.com/nadilas/moar/client"
 	"github.com/nadilas/moar/moarpb"
 	"github.com/spf13/cobra"
 	"github.com/twitchtv/twirp"
@@ -59,11 +59,7 @@ var (
 )
 
 func protobufClient() moarpb.ModuleRegistry {
-	return moarpb.NewModuleRegistryProtobufClient(
-		backendAddr,
-		http.DefaultClient,
-		twirp.WithClientPathPrefix(""),
-	)
+	return client.New(client.Config{Url: backendAddr}, twirp.WithClientPathPrefix(""))
 }
 
 func init() {

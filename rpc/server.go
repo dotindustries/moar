@@ -36,5 +36,8 @@ func NewServer(registry ModuleRegistry) *Server {
 }
 
 func (s *Server) Shutdown() {
-	s.registry.Close()
+	err := s.registry.Close()
+	if err != nil {
+		panic(err)
+	}
 }

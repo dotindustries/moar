@@ -2,9 +2,10 @@ package etcd
 
 import (
 	"context"
+	"log"
+
 	"github.com/nadilas/moar/internal"
 	"go.etcd.io/etcd/client/v3"
-	"log"
 )
 
 type Storage struct {
@@ -32,5 +33,8 @@ func (d *Storage) GetModule(ctx context.Context, name string) (*internal.Module,
 }
 
 func (d *Storage) Shutdown() {
-	d.etcd.Close()
+	err := d.etcd.Close()
+	if err != nil {
+		panic(err)
+	}
 }

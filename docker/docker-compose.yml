@@ -70,7 +70,7 @@ services:
     depends_on:
       - nginx
 
-## By default this config uses default local driver,
+## By default, this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
 volumes:
   data1-1:
