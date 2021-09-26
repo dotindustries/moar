@@ -9,17 +9,11 @@ import (
 
 type Module struct {
 	Name   string `json:"name,omitempty"`
-	Author string `json:"author"`
+	Author string `json:"author,omitempty"`
 	// All available versions in the module
 	Versions        []*Version `json:"versions,omitempty"`
+	Language        string     `json:"language,omitempty"`
 	selectedVersion *Version
-}
-
-func (m *Module) SelectedVersion() *semver.Version {
-	if m.selectedVersion == nil {
-		return nil
-	}
-	return m.selectedVersion.Version()
 }
 
 // Prints the module name and its version selector
@@ -69,6 +63,21 @@ func (m *Module) SelectVersion(constraint *semver.Constraints) *semver.Version {
 		}
 	}
 	return nil
+}
+
+func (m *Module) SelectedVersion() *semver.Version {
+	if m.selectedVersion == nil {
+		return nil
+	}
+	return m.selectedVersion.Version()
+}
+
+func (m *Module) SetSelectedVersion(version *semver.Version) {
+	for _, v := range m.Versions {
+		if v.Version().Equal(version) {
+			m.selectedVersion = v
+		}
+	}
 }
 
 // Latest returns the latest stable version, excludes pre-releases

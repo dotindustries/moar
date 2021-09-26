@@ -65,4 +65,6 @@ message DeleteVersionResponse {
 message Module {
   string name = 1;
   repeated string versions = 2;
+  string author = 3;
+  string language = 4;
 }

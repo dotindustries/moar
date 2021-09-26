@@ -25,15 +25,26 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 		return nil, twirp.InternalError(err.Error())
 	}
 
+	if len(module.Versions) == 0 {
+		return nil, twirp.NotFoundError("module has no versions")
+	}
+
 	var version *semver.Version
 	switch request.VersionSelector.(type) {
 	case *moarpb.GetUrlRequest_Version:
-		// requesting specific version
 		var err error
-		version, err = semver.NewVersion(request.GetVersion())
+		versionString := request.GetVersion()
+		if versionString == "latest" {
+			break
+		}
+		version, err = semver.NewVersion(versionString)
 		if err != nil {
 			return nil, twirp.WrapError(twirp.InvalidArgumentError("version", "version invalid"), err)
 		}
+		if version != nil && !module.HasVersion(version) {
+			return nil, twirp.NotFoundError("module version not found: " + request.ModuleName + "@" + version.String())
+		}
+		module.SetSelectedVersion(version)
 	case *moarpb.GetUrlRequest_VersionConstraint:
 		constraint, err := semver.NewConstraint(request.GetVersionConstraint())
 		if err != nil {
@@ -41,19 +52,9 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 		}
 		version = module.SelectVersion(constraint)
 	default:
-		return nil, twirp.RequiredArgumentError("versionSelector")
+		s.logger.Debug("Module (%s) version is not specified in query, defaulting to latest")
 	}
 
-	if version == nil || len(module.Versions) == 0 {
-		return nil, twirp.NotFoundError("module has no versions")
-	}
-
-	// 2. check if version exists in registry
-	if !module.HasVersion(version) {
-		return nil, twirp.NotFoundError("module version not found: " + request.ModuleName + "@" + version.String())
-	}
-
-	// 3. build GET url from storage service
 	uri, err := s.registry.UriForModule(ctx, module)
 	if err != nil {
 		return nil, twirp.InternalErrorWith(err)
@@ -63,6 +64,8 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 		Uri: uri,
 		Module: &moarpb.Module{
 			Name:     module.Name,
+			Author:   module.Author,
+			Language: module.Language,
 			Versions: module.VersionStrings(),
 		},
 		SelectedVersion: version.String(),
