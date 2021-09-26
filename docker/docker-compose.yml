@@ -64,6 +64,7 @@ services:
 
   moar:
     image: nadilas/moar-registry
+    pull_policy: always
     hostname: moar
     command:
       - ./moar
