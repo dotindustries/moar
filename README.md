@@ -1,3 +1,5 @@
+[![Test](https://github.com/nadilas/moar/actions/workflows/test.yml/badge.svg)](https://github.com/nadilas/moar/actions/workflows/test.yml)
+
 # moar
 
 moar (pronounce "more") is a modular augmentation registry for VueJS and ReactJS.

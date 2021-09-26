@@ -52,7 +52,7 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 		}
 		version = module.SelectVersion(constraint)
 	default:
-		s.logger.Debug("Module (%s) version is not specified in query, defaulting to latest")
+		s.logger.Debugf("Module (%s) version is not specified in query, defaulting to latest", request.ModuleName)
 	}
 
 	uri, err := s.registry.UriForModule(ctx, module)
