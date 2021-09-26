@@ -15,7 +15,7 @@ type RegistryReader interface {
 }
 
 type RegistryWriter interface {
-	NewModule(ctx context.Context, name string, author string) error
+	NewModule(ctx context.Context, name string, author string, language string) error
 	DeleteModule(ctx context.Context, module *internal.Module) error
 	UploadVersion(ctx context.Context, module *internal.Module, version *semver.Version, data []byte) error
 	DeleteVersion(ctx context.Context, module *internal.Module, version *semver.Version) error

@@ -21,7 +21,7 @@ func (s *Server) CreateModule(ctx context.Context, request *moarpb.CreateModuleR
 		return nil, twirp.RequiredArgumentError("moduleName")
 	}
 
-	err = s.registry.NewModule(ctx, request.ModuleName, request.Author)
+	err = s.registry.NewModule(ctx, request.ModuleName, request.Author, request.Language)
 	if err != nil {
 		return nil, twirp.InternalErrorWith(err)
 	}

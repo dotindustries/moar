@@ -13,6 +13,12 @@ import (
 	"github.com/twitchtv/twirp"
 )
 
+var versionCmd = &cobra.Command{
+	Use:     "version",
+	Short:   "Version management commands",
+	Aliases: []string{"v"},
+}
+
 var (
 	backendAddr string
 	module      string
@@ -28,11 +34,7 @@ var (
 				os.Exit(5)
 			}
 
-			client := moarpb.NewModuleRegistryProtobufClient(
-				backendAddr,
-				http.DefaultClient,
-				twirp.WithClientPathPrefix(""),
-			)
+			client := protobufClient()
 
 			filePath := args[0]
 			bytes, err := ioutil.ReadFile(filePath)
@@ -49,12 +51,20 @@ var (
 
 			if err != nil {
 				fmt.Println("ERROR: ", err)
-				os.Exit(0)
+				os.Exit(1)
 			}
 			fmt.Printf("Successfully uploaded new version: %s\n", ver.String())
 		},
 	}
 )
+
+func protobufClient() moarpb.ModuleRegistry {
+	return moarpb.NewModuleRegistryProtobufClient(
+		backendAddr,
+		http.DefaultClient,
+		twirp.WithClientPathPrefix(""),
+	)
+}
 
 func init() {
 	uploadCmd.Flags().StringVarP(&backendAddr, "addr", "a", "http://localhost:8000", "The backend service address")
@@ -68,5 +78,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	rootCmd.AddCommand(uploadCmd)
+	versionCmd.AddCommand(uploadCmd)
+	rootCmd.AddCommand(versionCmd)
 }

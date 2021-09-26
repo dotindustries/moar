@@ -37,10 +37,11 @@ func New(storage Storage, reverseProxy string) *Service {
 	return &Service{storage: storage, reverseProxy: reverseProxy}
 }
 
-func (s *Service) NewModule(ctx context.Context, name string, author string) error {
+func (s *Service) NewModule(ctx context.Context, name, author, language string) error {
 	m := &internal.Module{
 		Name:     name,
 		Author:   author,
+		Language: language,
 		Versions: nil,
 	}
 	return s.storage.PutModule(ctx, m)

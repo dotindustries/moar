@@ -29,6 +29,7 @@ message GetUrlResponse {
 message CreateModuleRequest {
   string moduleName = 1;
   string author = 2;
+  string language = 3;
 }
 
 message CreateModuleResponse {
