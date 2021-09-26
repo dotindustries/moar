@@ -1,6 +1,6 @@
 # moar
 
-moar (pronounce "more") is a modular augmentation registry for javascript UMD.
+moar (pronounce "more") is a modular augmentation registry for VueJS and ReactJS.
 
 # But why?
 

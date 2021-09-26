@@ -62,14 +62,6 @@ services:
       - minio3
       - minio4
 
-  moar:
-    image: nadilas/moar-registry
-    hostname: moar
-    ports:
-      - "8000:8000"
-    depends_on:
-      - nginx
-
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
 volumes:
