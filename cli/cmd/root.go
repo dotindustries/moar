@@ -19,12 +19,14 @@ import (
 	"os"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
 var reverseProxyAddr string
+var debug bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -34,6 +36,11 @@ var rootCmd = &cobra.Command{
 
 The registry can upload new VueJS or ReactJS modules, resolve the storage urls of version ranges
 or specific versions.`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if debug {
+			logrus.SetLevel(logrus.DebugLevel)
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -53,6 +60,7 @@ func init() {
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.moar.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&reverseProxyAddr, "proxy", "p", "http://localhost:9000", "The reverse proxy which is directed at the module storage.")
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Toggles whether debug logs are enabled")
 }
 
 // initConfig reads in config file and ENV variables if set.
