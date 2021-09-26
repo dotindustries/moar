@@ -159,7 +159,12 @@ func (s *Storage) setup() {
 		if err != nil {
 			s.logger.Fatal(err)
 		}
-		// TODO: setup access policy s.minioClient.SetBucketPolicy() public for download (read-only?)
+		readOnlyPolicy := `{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject"],"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::` + modulesBucket + `/*"],"Sid": ""}]}`
+		err = s.minioClient.SetBucketPolicy(context.Background(), modulesBucket, readOnlyPolicy)
+		if err != nil {
+			s.logger.Fatal(err)
+			return
+		}
 		s.logger.Info("Modules bucket setup complete")
 	} else {
 		s.logger.Info("Modules bucket verified")

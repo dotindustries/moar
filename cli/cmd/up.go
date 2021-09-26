@@ -4,11 +4,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/handlers"
 	s32 "github.com/nadilas/moar/internal/storage/s3"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-
-	"github.com/gorilla/handlers"
 	"github.com/spf13/cobra"
 	"github.com/twitchtv/twirp"
 	"go.elastic.co/apm/module/apmhttp"
@@ -37,8 +35,8 @@ var upCmd = &cobra.Command{
 		default:
 			logrus.Fatalf("invalid module storage type: '%s'", moduleStorageType)
 		}
-		reverseProxy := viper.GetString("proxy")
-		registry := registry.New(moduleStorage, reverseProxy)
+		logrus.Infof("Using reverse proxy for content with address: %s", reverseProxyAddr)
+		registry := registry.New(moduleStorage, reverseProxyAddr)
 		server := rpc.NewServer(registry)
 
 		twirpHandler := moarpb.NewModuleRegistryServer(server, twirp.WithServerPathPrefix(""))
