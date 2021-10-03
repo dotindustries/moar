@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Masterminds/semver"
+	"github.com/nadilas/moar/internal"
 	"github.com/nadilas/moar/moarpb"
 	"github.com/twitchtv/twirp"
 )
@@ -16,7 +17,7 @@ func (s *Server) UploadVersion(ctx context.Context, request *moarpb.UploadVersio
 	if err != nil {
 		return nil, twirp.InvalidArgumentError("version", err.Error())
 	}
-	module, err := s.registry.GetModule(ctx, request.ModuleName)
+	module, err := s.registry.GetModule(ctx, request.ModuleName, false)
 	if err != nil {
 		s.logger.Warnf("Module not found: %s: %v", request.ModuleName, err)
 		return nil, twirp.WrapError(twirp.NotFoundError("module not found: "+request.ModuleName), err)
@@ -25,8 +26,15 @@ func (s *Server) UploadVersion(ctx context.Context, request *moarpb.UploadVersio
 	if module.HasVersion(newVersion) {
 		return nil, twirp.InvalidArgumentError("version", "upload not possible: version already exists")
 	}
-
-	err = s.registry.UploadVersion(ctx, module, newVersion, request.FileData, request.StyleData)
+	var files []internal.File
+	for _, file := range request.Files {
+		files = append(files, internal.File{
+			Name:     file.Name,
+			MimeType: file.MimeType,
+			Data:     file.Data,
+		})
+	}
+	err = s.registry.UploadVersion(ctx, module, newVersion, files)
 	if err != nil {
 		return nil, twirp.InternalErrorWith(err)
 	}

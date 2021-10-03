@@ -10,7 +10,7 @@ import (
 )
 
 func (s *Server) CreateModule(ctx context.Context, request *moarpb.CreateModuleRequest) (*moarpb.CreateModuleResponse, error) {
-	_, err := s.registry.GetModule(ctx, request.ModuleName)
+	_, err := s.registry.GetModule(ctx, request.ModuleName, false)
 	if err == nil {
 		return nil, twirp.NewError(twirp.AlreadyExists, request.ModuleName)
 	} else if err != nil && !errors.Is(err, registry.ModuleNotFound) {

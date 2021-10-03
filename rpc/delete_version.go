@@ -22,7 +22,7 @@ func (s *Server) DeleteVersion(ctx context.Context, request *moarpb.DeleteVersio
 	if err != nil {
 		return nil, twirp.InvalidArgumentError("version", err.Error())
 	}
-	module, err := s.registry.GetModule(ctx, request.ModuleName)
+	module, err := s.registry.GetModule(ctx, request.ModuleName, false)
 	if errors.Is(err, registry.ModuleNotFound) {
 		return nil, twirp.NotFoundError("module not found: " + request.ModuleName)
 	} else if err != nil {

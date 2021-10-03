@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/Masterminds/semver"
 	"github.com/nadilas/moar/internal"
@@ -17,7 +18,7 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 	}
 
 	// 1. check if module exists in registry
-	module, err := s.registry.GetModule(ctx, request.ModuleName)
+	module, err := s.registry.GetModule(ctx, request.ModuleName, false)
 	if err != nil {
 		if errors.Is(err, registry.ModuleNotFound) {
 			return nil, twirp.NotFoundError("module not found: " + request.ModuleName)
@@ -30,7 +31,7 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 		return nil, twirp.NotFoundError("module has no versions")
 	}
 
-	var version *semver.Version
+	var version *internal.Version
 	selectedVersionString := ""
 	switch request.VersionSelector.(type) {
 	case *moarpb.GetUrlRequest_Version:
@@ -38,39 +39,42 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 		versionString := request.GetVersion()
 		if versionString == "latest" {
 			selectedVersionString = "latest"
+			version = module.Latest()
 			break
 		}
-		version, err = semver.NewVersion(versionString)
+		v, err := semver.NewVersion(versionString)
 		if err != nil {
 			return nil, twirp.WrapError(twirp.InvalidArgumentError("version", "version invalid"), err)
 		}
-		if version != nil && !module.HasVersion(version) {
-			return nil, twirp.NotFoundError("module version not found: " + request.ModuleName + "@" + version.String())
+		if v != nil && !module.HasVersion(v) {
+			return nil, twirp.NotFoundError("module version not found: " + request.ModuleName + "@" + v.String())
 		}
-		module.SetSelectedVersion(version)
+		version = module.SetSelectedVersion(v)
 	case *moarpb.GetUrlRequest_VersionConstraint:
 		constraint, err := semver.NewConstraint(request.GetVersionConstraint())
 		if err != nil {
 			return nil, twirp.WrapError(twirp.InvalidArgumentError("versionConstraint", "constraint invalid"), err)
 		}
 		version = module.SelectVersion(constraint)
-		selectedVersionString = version.String()
+		selectedVersionString = version.Version().String()
 	default:
+		version = module.Latest()
 		selectedVersionString = "latest"
 		s.logger.Debugf("Module (%s) version is not specified in query, defaulting to latest", request.ModuleName)
 	}
 
-	uri, err := s.registry.UriForModule(ctx, module)
-	if err != nil {
-		return nil, twirp.InternalErrorWith(err)
+	var resources []*moarpb.VersionResource
+	for _, file := range version.Files {
+		resources = append(resources, &moarpb.VersionResource{
+			Uri:         fmt.Sprintf("%s/%s", s.reverseProxy, file.Uri),
+			Name:        file.Name,
+			ContentType: file.MimeType,
+		})
 	}
-
 	mod := moduleToDto(module)
+
 	return &moarpb.GetUrlResponse{
-		Uri: &moarpb.VersionResources{
-			ScriptUri: uri.ScriptUri,
-			StyleUri:  uri.StyleUri,
-		},
+		Resources:       resources,
 		Module:          mod,
 		SelectedVersion: selectedVersionString,
 	}, nil
@@ -79,16 +83,17 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 func moduleToDto(module *internal.Module) *moarpb.Module {
 	var versions []*moarpb.Version
 	for _, v := range module.Versions {
-		var res *moarpb.VersionResources
-		if v.Resources != nil {
-			res = &moarpb.VersionResources{
-				ScriptUri: v.Resources.ScriptUri,
-				StyleUri:  v.Resources.StyleUri,
-			}
+		var files []*moarpb.File
+		for _, file := range v.Files {
+			files = append(files, &moarpb.File{
+				Name:     file.Name,
+				MimeType: file.MimeType,
+				Data:     file.Data,
+			})
 		}
 		versions = append(versions, &moarpb.Version{
-			Value:     v.Value,
-			Resources: res,
+			Name:  v.Value,
+			Files: files,
 		})
 	}
 	mod := &moarpb.Module{

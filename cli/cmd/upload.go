@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"mime"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/Masterminds/semver"
 	"github.com/nadilas/moar/client"
 	"github.com/nadilas/moar/moarpb"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/twitchtv/twirp"
 )
@@ -30,20 +33,8 @@ var (
 		Aliases: []string{"up"},
 		Args: func(cmd *cobra.Command, args []string) error {
 			min := 1
-			max := 2
-			if len(args) < min || len(args) > max {
-				return fmt.Errorf("accepts between %d and %d arg(s), received %d", min, max, len(args))
-			}
-			// first arg must be .js
-			if !strings.HasSuffix(args[0], ".js") {
-				return fmt.Errorf("first argument must be a javascript file with .js extension. Got: %s", args[0])
-			}
-			if len(args) < 2 {
-				return nil
-			}
-			// second arg if provided must be .css
-			if !strings.HasSuffix(args[1], ".css") {
-				return fmt.Errorf("second argument must be a stylesheet with .css extension. Got: %s", args[1])
+			if len(args) < min {
+				return fmt.Errorf("at least %d arg(s) are required, received %d", min, len(args))
 			}
 			return nil
 		},
@@ -56,18 +47,35 @@ var (
 
 			client := protobufClient()
 
-			scriptPath := args[0]
-			bytes := MustReadFileBytes(scriptPath)
-			var styleBytes []byte
-			if len(args) == 2 {
-				stylePath := args[1]
-				styleBytes = MustReadFileBytes(stylePath)
+			providedPath := args[0]
+			fi, err := os.Stat(providedPath)
+			if err != nil {
+				logrus.Fatal(err)
 			}
+			// grab files
+			var files []*moarpb.File
+			if fi.IsDir() {
+				dir, err := os.ReadDir(providedPath)
+				if err != nil {
+					logrus.Fatal(err)
+				}
+				for _, entry := range dir {
+					if entry.IsDir() {
+						continue
+					}
+					efi, _ := entry.Info()
+					f, err := parseFile(path.Join(providedPath, efi.Name()))
+					if err != nil {
+						logrus.Fatal(err)
+					}
+					files = append(files, f)
+				}
+			}
+			// TODO validate that at least 1 js file is available
 			_, err = client.UploadVersion(context.Background(), &moarpb.UploadVersionRequest{
 				ModuleName: module,
 				Version:    version,
-				FileData:   bytes,
-				StyleData:  styleBytes,
+				Files:      files,
 			})
 
 			if err != nil {
@@ -78,6 +86,21 @@ var (
 		},
 	}
 )
+
+func parseFile(filepath string) (*moarpb.File, error) {
+	fileBytes := MustReadFileBytes(filepath)
+	fileName := path.Base(filepath)
+
+	var mtype string
+	if mtype = mime.TypeByExtension(path.Ext(filepath)); mtype == "" {
+		mtype = fmt.Sprintf("application/%s", strings.TrimPrefix(path.Ext(filepath), "."))
+	}
+	return &moarpb.File{
+		Name:     fileName,
+		Data:     fileBytes,
+		MimeType: mtype,
+	}, nil
+}
 
 func MustReadFileBytes(path string) []byte {
 	bytes, err := ioutil.ReadFile(path)

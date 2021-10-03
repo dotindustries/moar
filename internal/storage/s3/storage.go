@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"path"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -48,13 +49,19 @@ func New(endpoint string) *Storage {
 	return s
 }
 
-func (s *Storage) PutModule(ctx context.Context, module *internal.Module) error {
+func (s *Storage) PutModule(ctx context.Context, module internal.Module) error {
 	bts, err := json.Marshal(module)
 	if err != nil {
 		return err
 	}
 	reader := bytes.NewReader(bts)
-	objectName := moduleManifestObjectName(module)
+	// clear file data before serializing
+	for _, version := range module.Versions {
+		for _, file := range version.Files {
+			file.Data = nil
+		}
+	}
+	objectName := moduleManifestObjectName(module.Name)
 	_, err = s.minioClient.PutObject(
 		ctx,
 		modulesBucket,
@@ -75,86 +82,102 @@ func (s *Storage) RemoveModule(ctx context.Context, name string) error {
 		ctx,
 		modulesBucket,
 		objectName,
-		minio.RemoveObjectOptions{},
-	)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *Storage) PutVersion(ctx context.Context, module string, version string, data []byte, styleData []byte) error {
-	r := bytes.NewReader(data)
-	objectName := moduleVersionObjectName(module, version)
-	_, err := s.minioClient.PutObject(
-		ctx,
-		modulesBucket,
-		objectName,
-		r,
-		r.Size(),
-		minio.PutObjectOptions{
-			ContentType: "text/javascript",
+		minio.RemoveObjectOptions{
+			ForceDelete: true,
 		},
 	)
 	if err != nil {
 		return err
 	}
-	if styleData != nil {
-		styleReader := bytes.NewReader(styleData)
-		styleOName := moduleVersionStyleObjectName(module, version)
-		_, err = s.minioClient.PutObject(
+	return nil
+}
+
+func (s *Storage) PutVersion(ctx context.Context, module string, version string, files []internal.File) error {
+	var added []string
+	var err error
+	basePath := moduleVersionBasePath(module, version)
+	defer func() {
+		// rollback function in case of errors
+		if err != nil {
+			for _, objectName := range added {
+				rollBackErr := s.minioClient.RemoveObject(ctx, modulesBucket, objectName, minio.RemoveObjectOptions{ForceDelete: true})
+				if rollBackErr != nil {
+					s.logger.Errorf("Failed to roll back after failing to put stylesheet: %s", rollBackErr)
+					// update err to rollback error
+					err = rollBackErr
+				}
+			}
+		}
+	}()
+	for _, file := range files {
+		r := bytes.NewReader(file.Data)
+		objectName := basePath + file.Name
+		info, err := s.minioClient.PutObject(
 			ctx,
 			modulesBucket,
-			styleOName,
-			styleReader,
-			styleReader.Size(),
+			objectName,
+			r,
+			r.Size(),
 			minio.PutObjectOptions{
-				ContentType: "text/css",
+				ContentType: file.MimeType,
 			},
 		)
 		if err != nil {
-			s.logger.Errorf("Failed to put stylesheet, rolling back: %s", err)
-			rollBackErr := s.minioClient.RemoveObject(ctx, modulesBucket, objectName, minio.RemoveObjectOptions{ForceDelete: true})
-			if rollBackErr != nil {
-				s.logger.Errorf("Failed to roll back after failing to put stylesheet: %s", rollBackErr)
-				return rollBackErr
-			}
 			return err
 		}
+		s.logger.Infof("Successfully written %d bytes for %s", info.Size, info.Key)
+		added = append(added, objectName)
 	}
 	return nil
 }
 
 func (s *Storage) RemoveVersion(ctx context.Context, module string, version string) error {
-	objectName := moduleVersionObjectName(module, version)
-	err := s.minioClient.RemoveObject(
+	basePath := moduleVersionBasePath(module, version)
+	return s.minioClient.RemoveObject(
 		ctx,
 		modulesBucket,
-		objectName,
-		minio.RemoveObjectOptions{},
+		basePath,
+		minio.RemoveObjectOptions{
+			ForceDelete: true,
+		},
 	)
-	if err != nil {
-		return err
-	}
-	_ = s.minioClient.RemoveObject(ctx, modulesBucket, moduleVersionStyleObjectName(module, version), minio.RemoveObjectOptions{ForceDelete: true})
-	return nil
 }
 
-func (s *Storage) UriForModule(ctx context.Context, module string, version string) (*internal.VersionResources, error) {
-	scriptObjectName := moduleVersionObjectName(module, version)
-	scriptUri := ""
-	if s.checkObjectExists(ctx, scriptObjectName) {
-		scriptUri = fmt.Sprintf("%s/%s", modulesBucket, scriptObjectName)
+func (s *Storage) ModuleResources(ctx context.Context, module string, version string, loadData bool) ([]internal.File, error) {
+	basePath := moduleVersionBasePath(module, version)
+	var files []internal.File
+
+	for object := range s.minioClient.ListObjects(ctx, modulesBucket, minio.ListObjectsOptions{
+		Prefix:    basePath,
+		Recursive: true,
+	}) {
+		var bts []byte
+		if loadData {
+			obj, err := s.minioClient.GetObject(ctx, modulesBucket, object.Key, minio.GetObjectOptions{})
+			if err != nil {
+				return nil, err
+			}
+			bts, err = ioutil.ReadAll(obj)
+			if err != nil {
+				errResp := minio.ToErrorResponse(err)
+				if errResp.Code == "NoSuchKey" {
+					return nil, storage.FileNotFound
+				}
+				return nil, err
+			}
+		}
+		stat, err := s.minioClient.StatObject(ctx, modulesBucket, object.Key, minio.StatObjectOptions{})
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, internal.File{
+			Name:     path.Base(object.Key),
+			MimeType: stat.ContentType,
+			Data:     bts,
+			Uri:      fmt.Sprintf("%s/%s", modulesBucket, object.Key),
+		})
 	}
-	styleObjectName := moduleVersionStyleObjectName(module, version)
-	styleUri := ""
-	if s.checkObjectExists(ctx, styleObjectName) {
-		styleUri = fmt.Sprintf("%s/%s", modulesBucket, styleObjectName)
-	}
-	return &internal.VersionResources{
-		ScriptUri: scriptUri,
-		StyleUri:  styleUri,
-	}, nil
+	return files, nil
 }
 
 func (s *Storage) checkObjectExists(ctx context.Context, objectName string) bool {
@@ -165,7 +188,7 @@ func (s *Storage) checkObjectExists(ctx context.Context, objectName string) bool
 	return true
 }
 
-func (s *Storage) GetModule(ctx context.Context, name string) (*internal.Module, error) {
+func (s *Storage) GetModule(ctx context.Context, name string, loadData bool) (*internal.Module, error) {
 	objectName := moduleManifestObjectNameFromString(name)
 	manifestObj, err := s.minioClient.GetObject(ctx, modulesBucket, objectName, minio.GetObjectOptions{})
 	if err != nil {
@@ -188,7 +211,7 @@ func (s *Storage) GetModule(ctx context.Context, name string) (*internal.Module,
 	module.Init()
 	// load available resources
 	for _, version := range module.Versions {
-		version.Resources, _ = s.UriForModule(ctx, module.Name, version.Version().String())
+		version.Files, _ = s.ModuleResources(ctx, module.Name, version.Version().String(), loadData)
 	}
 
 	return module, nil
@@ -220,18 +243,14 @@ func (s *Storage) setup() {
 	}
 }
 
-func moduleManifestObjectName(module *internal.Module) string {
-	return module.Name + manifestSuffix
+func moduleManifestObjectName(module string) string {
+	return module + manifestSuffix
 }
 
 func moduleManifestObjectNameFromString(module string) string {
 	return module + manifestSuffix
 }
 
-func moduleVersionObjectName(module string, version string) string {
-	return fmt.Sprintf("%s/%s@%s.js", module, module, version)
-}
-
-func moduleVersionStyleObjectName(module string, version string) string {
-	return fmt.Sprintf("%s/%s@%s.css", module, module, version)
+func moduleVersionBasePath(module, version string) string {
+	return fmt.Sprintf("%s/%s/", module, version)
 }

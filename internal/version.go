@@ -8,15 +8,16 @@ type VersionResources struct {
 }
 
 type Version struct {
-	Value     string            `json:"value,omitempty"`
-	Resources *VersionResources `json:"resources,omitempty"`
-	v         *semver.Version
+	Value string `json:"value,omitempty"`
+	v     *semver.Version
+	Files []File `json:"files,omitempty"`
 }
 
-func NewVersion(ver *semver.Version) *Version {
+func NewVersion(ver *semver.Version, files []File) *Version {
 	return &Version{
 		Value: ver.String(),
 		v:     ver,
+		Files: files,
 	}
 }
 

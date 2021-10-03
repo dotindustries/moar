@@ -36,8 +36,8 @@ var upCmd = &cobra.Command{
 			logrus.Fatalf("invalid module storage type: '%s'", moduleStorageType)
 		}
 		logrus.Infof("Using reverse proxy for content with address: %s", reverseProxyAddr)
-		registry := registry.New(moduleStorage, reverseProxyAddr)
-		server := rpc.NewServer(registry)
+		registry := registry.New(moduleStorage)
+		server := rpc.NewServer(registry, reverseProxyAddr)
 
 		twirpHandler := moarpb.NewModuleRegistryServer(server, twirp.WithServerPathPrefix(""))
 		tracedHandler := apmhttp.Wrap(twirpHandler)

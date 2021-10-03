@@ -13,7 +13,7 @@ func (s *Server) GetModule(ctx context.Context, request *moarpb.GetModuleRequest
 	if request.ModuleName == "" {
 		return nil, twirp.RequiredArgumentError("moduleName")
 	}
-	module, err := s.registry.GetModule(ctx, request.ModuleName)
+	module, err := s.registry.GetModule(ctx, request.ModuleName, false)
 	if errors.Is(err, registry.ModuleNotFound) {
 		return nil, twirp.NotFoundError("module not found: " + request.ModuleName)
 	} else if err != nil {

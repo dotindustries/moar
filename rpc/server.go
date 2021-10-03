@@ -9,15 +9,14 @@ import (
 )
 
 type RegistryReader interface {
-	GetModule(ctx context.Context, name string) (*internal.Module, error)
-	UriForModule(ctx context.Context, module *internal.Module) (*internal.VersionResources, error)
+	GetModule(ctx context.Context, name string, loadData bool) (*internal.Module, error)
 	Close() error
 }
 
 type RegistryWriter interface {
 	NewModule(ctx context.Context, name string, author string, language string) error
 	DeleteModule(ctx context.Context, module *internal.Module) error
-	UploadVersion(ctx context.Context, module *internal.Module, version *semver.Version, data []byte, styleData []byte) error
+	UploadVersion(ctx context.Context, module *internal.Module, version *semver.Version, files []internal.File) error
 	DeleteVersion(ctx context.Context, module *internal.Module, version *semver.Version) error
 }
 
@@ -27,12 +26,13 @@ type ModuleRegistry interface {
 }
 
 type Server struct {
-	registry ModuleRegistry
-	logger   *logrus.Entry
+	registry     ModuleRegistry
+	reverseProxy string
+	logger       *logrus.Entry
 }
 
-func NewServer(registry ModuleRegistry) *Server {
-	return &Server{registry: registry, logger: logrus.WithField("op", "server")}
+func NewServer(registry ModuleRegistry, reverseProxy string) *Server {
+	return &Server{registry: registry, logger: logrus.WithField("op", "server"), reverseProxy: reverseProxy}
 }
 
 func (s *Server) Shutdown() {

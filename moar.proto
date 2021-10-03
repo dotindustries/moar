@@ -29,13 +29,14 @@ message GetUrlRequest {
   }
 }
 
-message VersionResources {
-  string scriptUri = 1;
-  string styleUri = 2;
+message VersionResource {
+  string uri = 1;
+  string name = 2;
+  string contentType = 3;
 }
 
 message GetUrlResponse {
-  VersionResources uri = 1;
+  repeated VersionResource resources = 1;
   Module module = 2;
   string selectedVersion = 3;
 }
@@ -61,8 +62,7 @@ message DeleteModuleResponse {
 message UploadVersionRequest {
   string moduleName = 1;
   string version = 2;
-  bytes fileData = 3;
-  bytes styleData = 4;
+  repeated File files = 3;
 }
 
 message UploadVersionResponse {
@@ -86,6 +86,12 @@ message Module {
 }
 
 message Version {
-  string value = 1;
-  VersionResources resources = 2;
+  string name = 1;
+  repeated File files = 2;
+}
+
+message File {
+  string name = 1;
+  string mimeType = 2;
+  bytes data = 3;
 }

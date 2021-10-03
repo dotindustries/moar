@@ -3,7 +3,6 @@ package registry
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/Masterminds/semver"
 	"github.com/nadilas/moar/internal"
@@ -11,15 +10,15 @@ import (
 )
 
 type Reader interface {
-	UriForModule(ctx context.Context, module string, version string) (*internal.VersionResources, error)
-	GetModule(ctx context.Context, name string) (*internal.Module, error)
+	ModuleResources(ctx context.Context, module string, version string, data bool) ([]internal.File, error)
+	GetModule(ctx context.Context, name string, loadData bool) (*internal.Module, error)
 	Close() error
 }
 
 type Writer interface {
-	PutModule(ctx context.Context, module *internal.Module) error
+	PutModule(ctx context.Context, module internal.Module) error
 	RemoveModule(ctx context.Context, name string) error
-	PutVersion(ctx context.Context, module string, version string, data []byte, styleData []byte) error
+	PutVersion(ctx context.Context, module string, version string, files []internal.File) error
 	RemoveVersion(ctx context.Context, module string, version string) error
 }
 
@@ -29,16 +28,15 @@ type Storage interface {
 }
 
 type Service struct {
-	storage      Storage
-	reverseProxy string
+	storage Storage
 }
 
-func New(storage Storage, reverseProxy string) *Service {
-	return &Service{storage: storage, reverseProxy: reverseProxy}
+func New(storage Storage) *Service {
+	return &Service{storage: storage}
 }
 
 func (s *Service) NewModule(ctx context.Context, name, author, language string) error {
-	m := &internal.Module{
+	m := internal.Module{
 		Name:     name,
 		Author:   author,
 		Language: language,
@@ -59,15 +57,16 @@ func (s *Service) DeleteModule(ctx context.Context, module *internal.Module) err
 	return s.storage.RemoveModule(ctx, module.Name)
 }
 
-func (s *Service) UploadVersion(ctx context.Context, module *internal.Module, version *semver.Version, data []byte, styleData []byte) error {
+func (s *Service) UploadVersion(ctx context.Context, module *internal.Module, version *semver.Version, files []internal.File) error {
 	// upload version
-	err := s.storage.PutVersion(ctx, module.Name, version.String(), data, styleData)
+	err := s.storage.PutVersion(ctx, module.Name, version.String(), files)
 	if err != nil {
 		return err
 	}
 	// update module manifest to include new version
-	module.Versions = append(module.Versions, internal.NewVersion(version))
-	return s.storage.PutModule(ctx, module)
+	newVersion := internal.NewVersion(version, files)
+	module.Versions = append(module.Versions, newVersion)
+	return s.storage.PutModule(ctx, *module)
 }
 
 func (s *Service) DeleteVersion(ctx context.Context, module *internal.Module, version *semver.Version) error {
@@ -87,36 +86,11 @@ func (s *Service) DeleteVersion(ctx context.Context, module *internal.Module, ve
 		return VersionNotFound
 	}
 	module.Versions = append(module.Versions[:idx], module.Versions[idx+1:]...)
-	return s.storage.PutModule(ctx, module)
+	return s.storage.PutModule(ctx, *module)
 }
 
-// UriForModule finds the public URI for a module. If a version has been previously selected, that version is used, otherwise
-// this function defaults to the latest version of the module
-func (s *Service) UriForModule(ctx context.Context, module *internal.Module) (*internal.VersionResources, error) {
-	v := module.SelectedVersion()
-	if v == nil {
-		v = module.Latest()
-	}
-	vResources, err := s.storage.UriForModule(ctx, module.Name, v.String())
-	if err != nil {
-		return nil, err
-	}
-	scriptUri := ""
-	if vResources.ScriptUri != "" {
-		scriptUri = fmt.Sprintf("%s/%s", s.reverseProxy, vResources.ScriptUri)
-	}
-	styleUri := ""
-	if vResources.StyleUri != "" {
-		styleUri = fmt.Sprintf("%s/%s", s.reverseProxy, vResources.StyleUri)
-	}
-	return &internal.VersionResources{
-		ScriptUri: scriptUri,
-		StyleUri:  styleUri,
-	}, nil
-}
-
-func (s *Service) GetModule(ctx context.Context, name string) (*internal.Module, error) {
-	m, err := s.storage.GetModule(ctx, name)
+func (s *Service) GetModule(ctx context.Context, name string, loadData bool) (*internal.Module, error) {
+	m, err := s.storage.GetModule(ctx, name, loadData)
 	if errors.Is(err, storage.ModuleNotFound) {
 		return nil, ModuleNotFound
 	}
