@@ -207,7 +207,7 @@ func (s *Storage) GetModule(ctx context.Context, name string, loadData bool) (*i
 	if err != nil {
 		return nil, err
 	}
-	// FIXME: MUST be called first after unmarshaling
+	// FIXME: remove this hardcoded dependency MUST be called first after unmarshaling
 	module.Init()
 	// load available resources
 	for _, version := range module.Versions {
