@@ -33,3 +33,11 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+brews:
+  - name: moarctl
+    tap:
+      owner: blightio
+      name: homebrew-tap
+      branch: master
+    folder: Formula
+    license: "MIT"

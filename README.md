@@ -15,3 +15,11 @@ by Markus Oberlehner this registry is a central hub for managing UMD modules for
 2. create your first module
 3. upload a version of the module
 4. making sure everything is in place
+
+## Install command line
+
+### macos
+```
+brew install blightio/tap/moarctl
+```
+
