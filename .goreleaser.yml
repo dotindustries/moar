@@ -41,4 +41,6 @@ brews:
       branch: master
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     folder: Formula
+    homepage: "https://github.com/blightio/homebrew-tap.git"
+    description: "Cli app to for working with moar registry"
     license: "MIT"
