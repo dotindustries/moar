@@ -39,5 +39,6 @@ brews:
       owner: blightio
       name: homebrew-tap
       branch: master
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     folder: Formula
     license: "MIT"
