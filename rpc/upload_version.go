@@ -23,8 +23,8 @@ func (s *Server) UploadVersion(ctx context.Context, request *moarpb.UploadVersio
 		return nil, twirp.WrapError(twirp.NotFoundError("module not found: "+request.ModuleName), err)
 	}
 
-	if module.HasVersion(newVersion) {
-		return nil, twirp.InvalidArgumentError("version", "upload not possible: version already exists")
+	if module.HasVersion(newVersion) && !s.versionOverwriteEnabled {
+		return nil, twirp.InvalidArgumentError("version", "overwrite disabled: version already exists")
 	}
 	var files []internal.File
 	for _, file := range request.Files {

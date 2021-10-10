@@ -26,13 +26,23 @@ type ModuleRegistry interface {
 }
 
 type Server struct {
-	registry     ModuleRegistry
-	reverseProxy string
-	logger       *logrus.Entry
+	registry                ModuleRegistry
+	reverseProxy            string
+	logger                  *logrus.Entry
+	versionOverwriteEnabled bool
 }
 
-func NewServer(registry ModuleRegistry, reverseProxy string) *Server {
-	return &Server{registry: registry, logger: logrus.WithField("op", "server"), reverseProxy: reverseProxy}
+type Opts struct {
+	VersionOverwriteEnabled bool
+}
+
+func NewServer(registry ModuleRegistry, reverseProxy string, opts Opts) *Server {
+	return &Server{
+		registry:                registry,
+		logger:                  logrus.WithField("op", "server"),
+		reverseProxy:            reverseProxy,
+		versionOverwriteEnabled: opts.VersionOverwriteEnabled,
+	}
 }
 
 func (s *Server) Shutdown() {

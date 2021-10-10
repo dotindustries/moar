@@ -37,7 +37,7 @@ var upCmd = &cobra.Command{
 		}
 		logrus.Infof("Using reverse proxy for content with address: %s", reverseProxyAddr)
 		registry := registry.New(moduleStorage)
-		server := rpc.NewServer(registry, reverseProxyAddr)
+		server := rpc.NewServer(registry, reverseProxyAddr, rpc.Opts{})
 
 		twirpHandler := moarpb.NewModuleRegistryServer(server, twirp.WithServerPathPrefix(""))
 		tracedHandler := apmhttp.Wrap(twirpHandler)
