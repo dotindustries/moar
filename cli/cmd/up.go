@@ -17,9 +17,10 @@ import (
 )
 
 var (
-	moduleStorageType string
-	storageAddress    string
-	host              string
+	moduleStorageType       string
+	storageAddress          string
+	host                    string
+	versionOverwriteEnabled bool
 )
 
 var upCmd = &cobra.Command{
@@ -37,7 +38,9 @@ var upCmd = &cobra.Command{
 		}
 		logrus.Infof("Using reverse proxy for content with address: %s", reverseProxyAddr)
 		registry := registry.New(moduleStorage)
-		server := rpc.NewServer(registry, reverseProxyAddr, rpc.Opts{})
+		server := rpc.NewServer(registry, reverseProxyAddr, rpc.Opts{
+			VersionOverwriteEnabled: versionOverwriteEnabled,
+		})
 
 		twirpHandler := moarpb.NewModuleRegistryServer(server, twirp.WithServerPathPrefix(""))
 		tracedHandler := apmhttp.Wrap(twirpHandler)
@@ -55,5 +58,6 @@ func init() {
 	upCmd.Flags().StringVar(&moduleStorageType, "storage_type", "s3", "Defines what storage type to use. Possible values: s3")
 	upCmd.Flags().StringVar(&storageAddress, "storage_addr", "localhost:9000", "The address to reach the storage")
 	upCmd.Flags().StringVar(&host, "host", ":8000", "The address to bind the server to")
+	upCmd.Flags().BoolVar(&versionOverwriteEnabled, "overwrite", false, "Toggles whether version overwrite is enabled")
 	rootCmd.AddCommand(upCmd)
 }
