@@ -1,4 +1,4 @@
-module github.com/nadilas/moar
+module github.com/dotindustries/moar
 
 go 1.16
 

@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver"
-	"github.com/nadilas/moar/client"
-	"github.com/nadilas/moar/moarpb"
+	"github.com/dotindustries/moar/client"
+	"github.com/dotindustries/moar/moarpb"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/twitchtv/twirp"

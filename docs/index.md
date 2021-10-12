@@ -16,7 +16,7 @@ by Markus Oberlehner this registry is a central hub for managing UMD modules for
     ```
 3. Clone the Vue example repository
     ```bash
-    git clone github.com/nadilas/moar-vue-example
+    git clone github.com/dotindustries/moar-vue-example
     ```
    1. Install moar-cli
       ```bash

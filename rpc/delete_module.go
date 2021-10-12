@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/nadilas/moar/internal/registry"
-	"github.com/nadilas/moar/moarpb"
+	"github.com/dotindustries/moar/internal/registry"
+	"github.com/dotindustries/moar/moarpb"
 	"github.com/twitchtv/twirp"
 )
 

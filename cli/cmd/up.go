@@ -4,16 +4,16 @@ import (
 	"net/http"
 	"os"
 
+	s32 "github.com/dotindustries/moar/internal/storage/s3"
 	"github.com/gorilla/handlers"
-	s32 "github.com/nadilas/moar/internal/storage/s3"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/twitchtv/twirp"
 	"go.elastic.co/apm/module/apmhttp"
 
-	"github.com/nadilas/moar/internal/registry"
-	"github.com/nadilas/moar/moarpb"
-	"github.com/nadilas/moar/rpc"
+	"github.com/dotindustries/moar/internal/registry"
+	"github.com/dotindustries/moar/moarpb"
+	"github.com/dotindustries/moar/rpc"
 )
 
 var (

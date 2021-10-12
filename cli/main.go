@@ -1,4 +1,4 @@
-// Copyright © 2021 nadilas
+// Copyright © 2021 dotindustries
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/nadilas/moar/cli/cmd"
+import "github.com/dotindustries/moar/cli/cmd"
 
 func main() {
 	cmd.Execute()

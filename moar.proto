@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package moarpb;
 
-option go_package = "github.com/nadilas/moar/moarpb";
+option go_package = "github.com/dotindustries/moar/moarpb";
 
 service ModuleRegistry {
   rpc GetUrl(GetUrlRequest) returns (GetUrlResponse);

@@ -8,10 +8,10 @@ import (
 	"io/ioutil"
 	"path"
 
+	"github.com/dotindustries/moar/internal"
+	"github.com/dotindustries/moar/internal/storage"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/nadilas/moar/internal"
-	"github.com/nadilas/moar/internal/storage"
 	"github.com/sirupsen/logrus"
 )
 

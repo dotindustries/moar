@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/Masterminds/semver"
-	"github.com/nadilas/moar/internal"
-	"github.com/nadilas/moar/internal/storage"
+	"github.com/dotindustries/moar/internal"
+	"github.com/dotindustries/moar/internal/storage"
 )
 
 type Reader interface {

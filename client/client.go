@@ -3,7 +3,7 @@ package client
 import (
 	"net/http"
 
-	"github.com/nadilas/moar/moarpb"
+	"github.com/dotindustries/moar/moarpb"
 	"github.com/twitchtv/twirp"
 )
 

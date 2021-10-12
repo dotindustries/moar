@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/semver"
-	"github.com/nadilas/moar/internal"
-	"github.com/nadilas/moar/internal/registry"
-	"github.com/nadilas/moar/moarpb"
+	"github.com/dotindustries/moar/internal"
+	"github.com/dotindustries/moar/internal/registry"
+	"github.com/dotindustries/moar/moarpb"
 	"github.com/twitchtv/twirp"
 )
 

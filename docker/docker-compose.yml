@@ -63,7 +63,7 @@ services:
       - minio4
 
   moar:
-    image: nadilas/moar-registry
+    image: dotindustries/moar-registry
     pull_policy: always
     hostname: moar
     command:

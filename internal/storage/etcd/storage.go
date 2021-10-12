@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/nadilas/moar/internal"
+	"github.com/dotindustries/moar/internal"
 	"go.etcd.io/etcd/client/v3"
 )
 

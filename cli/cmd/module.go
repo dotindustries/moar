@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nadilas/moar/moarpb"
+	"github.com/dotindustries/moar/moarpb"
 	"github.com/spf13/cobra"
 )
 
