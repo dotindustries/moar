@@ -41,6 +41,6 @@ brews:
       branch: master
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     folder: Formula
-    homepage: "https://github.com/dotindustries/homebrew-tap.git"
+    homepage: "https://github.com/dotindustries/homebrew-tap"
     description: "Cli app to for working with moar registry"
     license: "MIT"
