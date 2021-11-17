@@ -4,16 +4,15 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/dotindustries/moar/internal/registry"
 	"github.com/dotindustries/moar/internal/storage/s3"
+	"github.com/dotindustries/moar/moarpb"
+	"github.com/dotindustries/moar/rpc"
 	"github.com/gorilla/handlers"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/twitchtv/twirp"
 	"go.elastic.co/apm/module/apmhttp"
-
-	"github.com/dotindustries/moar/internal/registry"
-	"github.com/dotindustries/moar/moarpb"
-	"github.com/dotindustries/moar/rpc"
 )
 
 var (
@@ -36,8 +35,15 @@ var upCmd = &cobra.Command{
 		default:
 			logrus.Fatalf("invalid module storage type: '%s'", moduleStorageType)
 		}
-		logrus.Infof("Using reverse proxy for content with address: %s", reverseProxyAddr)
 		registry := registry.New(moduleStorage)
+
+		if reverseProxyAddr == "" {
+			reverseProxyAddr = os.Getenv("S3_PROXY_URL")
+			if reverseProxyAddr == "" {
+				reverseProxyAddr = defaultReverseProxyAddr
+			}
+		}
+		logrus.Infof("Using reverse proxy for content with address: %s", reverseProxyAddr)
 		server := rpc.NewServer(registry, reverseProxyAddr, rpc.Opts{
 			VersionOverwriteEnabled: versionOverwriteEnabled,
 		})

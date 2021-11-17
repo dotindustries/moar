@@ -24,6 +24,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	defaultReverseProxyAddr = "http://localhost:9000"
+)
+
 var cfgFile string
 var reverseProxyAddr string
 var debug bool
@@ -59,7 +63,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.moar.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&reverseProxyAddr, "proxy", "p", "http://localhost:9000", "The reverse proxy which is directed at the module storage.")
+	rootCmd.PersistentFlags().StringVarP(&reverseProxyAddr, "proxy", "p", "", "The reverse proxy which is directed at the module storage.")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Toggles whether debug logs are enabled")
 }
 
