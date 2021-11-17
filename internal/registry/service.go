@@ -12,6 +12,7 @@ import (
 type Reader interface {
 	ModuleResources(ctx context.Context, module string, version string, data bool) ([]internal.File, error)
 	GetModule(ctx context.Context, name string, loadData bool) (*internal.Module, error)
+	GetModules(ctx context.Context, loadData bool) ([]*internal.Module, error)
 	Close() error
 }
 
@@ -95,6 +96,14 @@ func (s *Service) GetModule(ctx context.Context, name string, loadData bool) (*i
 		return nil, ModuleNotFound
 	}
 	return m, err
+}
+
+func (s *Service) GetAllModules(ctx context.Context, loadData bool) ([]*internal.Module, error) {
+	modules, err := s.storage.GetModules(ctx, loadData)
+	if err != nil {
+		return nil, err
+	}
+	return modules, nil
 }
 
 func (s *Service) Close() error {

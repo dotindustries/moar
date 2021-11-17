@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	s32 "github.com/dotindustries/moar/internal/storage/s3"
+	"github.com/dotindustries/moar/internal/storage/s3"
 	"github.com/gorilla/handlers"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -32,7 +32,7 @@ var upCmd = &cobra.Command{
 		// case "etcd":
 		// moduleStorage = internal.NewDatabase()
 		case "s3":
-			moduleStorage = s32.New(storageAddress)
+			moduleStorage = s3.New(storageAddress)
 		default:
 			logrus.Fatalf("invalid module storage type: '%s'", moduleStorageType)
 		}
@@ -56,7 +56,7 @@ var upCmd = &cobra.Command{
 
 func init() {
 	upCmd.Flags().StringVar(&moduleStorageType, "storage_type", "s3", "Defines what storage type to use. Possible values: s3")
-	upCmd.Flags().StringVar(&storageAddress, "storage_addr", "localhost:9000", "The address to reach the storage")
+	upCmd.Flags().StringVar(&storageAddress, "storage_addr", "", "The address to reach the storage")
 	upCmd.Flags().StringVar(&host, "host", ":8000", "The address to bind the server to")
 	upCmd.Flags().BoolVar(&versionOverwriteEnabled, "overwrite", false, "Toggles whether version overwrite is enabled")
 	rootCmd.AddCommand(upCmd)

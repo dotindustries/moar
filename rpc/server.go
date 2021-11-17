@@ -9,6 +9,7 @@ import (
 )
 
 type RegistryReader interface {
+	GetAllModules(ctx context.Context, loadData bool) ([]*internal.Module, error)
 	GetModule(ctx context.Context, name string, loadData bool) (*internal.Module, error)
 	Close() error
 }

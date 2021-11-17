@@ -66,6 +66,7 @@ services:
     image: dotindustries/moar-registry
     pull_policy: always
     hostname: moar
+    restart: on-failure
     command:
       - ./moar
       - up

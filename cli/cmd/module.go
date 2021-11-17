@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/dotindustries/moar/moarpb"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
 
@@ -13,6 +14,42 @@ var moduleCmd = &cobra.Command{
 	Use:     "module",
 	Short:   "Module management commands",
 	Aliases: []string{"m"},
+}
+
+var getAll bool
+var getModuleCmd = &cobra.Command{
+	Use:     "get",
+	Short:   "Get module details",
+	Aliases: []string{"g", "read", "r"},
+	Run: func(cmd *cobra.Command, args []string) {
+		client := protobufClient()
+
+		request := &moarpb.GetModuleRequest{}
+
+		if !getAll {
+			if len(args) < 1 {
+				fmt.Println("ERROR: module name not provided")
+				os.Exit(1)
+			}
+			request.ModuleName = args[0]
+		}
+		response, err := client.GetModule(context.Background(), request)
+		if err != nil {
+			fmt.Println("ERROR: ", err)
+			os.Exit(1)
+		}
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{"Module", "Author", "Language", "Version"})
+		rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
+		for _, module := range response.Module {
+			for _, v := range module.Versions {
+				t.AppendRow(table.Row{module.Name, module.Author, module.Language, v.Name}, rowConfigAutoMerge)
+				// t.AppendSeparator()
+			}
+		}
+		t.Render()
+	},
 }
 
 var author, language string
@@ -59,5 +96,8 @@ func init() {
 		panic(err)
 	}
 	moduleCmd.AddCommand(newModuleCmd)
+
+	getModuleCmd.Flags().BoolVarP(&getAll, "all", "a", false, "Gets all modules within the system ignoring provided module name arguments")
+	moduleCmd.AddCommand(getModuleCmd)
 	rootCmd.AddCommand(moduleCmd)
 }

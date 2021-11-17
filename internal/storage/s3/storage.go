@@ -6,47 +6,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
+	"strings"
 
 	"github.com/dotindustries/moar/internal"
 	"github.com/dotindustries/moar/internal/storage"
 	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/sirupsen/logrus"
 )
 
-const modulesBucket = "modules"
 const manifestSuffix = "/manifest.json"
 
 type Storage struct {
-	endpoint    string
 	minioClient *minio.Client
 	logger      *logrus.Entry
-}
-
-func New(endpoint string) *Storage {
-	logger := logrus.WithField("op", "storage")
-	if endpoint == "" {
-		endpoint = "localhost:9000"
-	}
-	accessKeyID := "minio"
-	secretAccessKey := "minio123"
-	useSSL := false
-	minioClient, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
-		Secure: useSSL,
-	})
-	if err != nil {
-		logger.Fatalln(err)
-	}
-
-	s := &Storage{
-		endpoint:    endpoint,
-		minioClient: minioClient,
-		logger:      logger,
-	}
-	s.setup()
-	return s
+	bucket      string
 }
 
 func (s *Storage) PutModule(ctx context.Context, module internal.Module) error {
@@ -64,7 +39,7 @@ func (s *Storage) PutModule(ctx context.Context, module internal.Module) error {
 	objectName := moduleManifestObjectName(module.Name)
 	_, err = s.minioClient.PutObject(
 		ctx,
-		modulesBucket,
+		s.bucket,
 		objectName,
 		reader,
 		int64(reader.Len()),
@@ -80,7 +55,7 @@ func (s *Storage) RemoveModule(ctx context.Context, name string) error {
 	objectName := moduleManifestObjectNameFromString(name)
 	err := s.minioClient.RemoveObject(
 		ctx,
-		modulesBucket,
+		s.bucket,
 		objectName,
 		minio.RemoveObjectOptions{
 			ForceDelete: true,
@@ -100,7 +75,7 @@ func (s *Storage) PutVersion(ctx context.Context, module string, version string,
 		// rollback function in case of errors
 		if err != nil {
 			for _, objectName := range added {
-				rollBackErr := s.minioClient.RemoveObject(ctx, modulesBucket, objectName, minio.RemoveObjectOptions{ForceDelete: true})
+				rollBackErr := s.minioClient.RemoveObject(ctx, s.bucket, objectName, minio.RemoveObjectOptions{ForceDelete: true})
 				if rollBackErr != nil {
 					s.logger.Errorf("Failed to roll back after failing to put stylesheet: %s", rollBackErr)
 					// update err to rollback error
@@ -114,7 +89,7 @@ func (s *Storage) PutVersion(ctx context.Context, module string, version string,
 		objectName := basePath + file.Name
 		info, err := s.minioClient.PutObject(
 			ctx,
-			modulesBucket,
+			s.bucket,
 			objectName,
 			r,
 			r.Size(),
@@ -135,7 +110,7 @@ func (s *Storage) RemoveVersion(ctx context.Context, module string, version stri
 	basePath := moduleVersionBasePath(module, version)
 	return s.minioClient.RemoveObject(
 		ctx,
-		modulesBucket,
+		s.bucket,
 		basePath,
 		minio.RemoveObjectOptions{
 			ForceDelete: true,
@@ -147,13 +122,13 @@ func (s *Storage) ModuleResources(ctx context.Context, module string, version st
 	basePath := moduleVersionBasePath(module, version)
 	var files []internal.File
 
-	for object := range s.minioClient.ListObjects(ctx, modulesBucket, minio.ListObjectsOptions{
+	for object := range s.minioClient.ListObjects(ctx, s.bucket, minio.ListObjectsOptions{
 		Prefix:    basePath,
 		Recursive: true,
 	}) {
 		var bts []byte
 		if loadData {
-			obj, err := s.minioClient.GetObject(ctx, modulesBucket, object.Key, minio.GetObjectOptions{})
+			obj, err := s.minioClient.GetObject(ctx, s.bucket, object.Key, minio.GetObjectOptions{})
 			if err != nil {
 				return nil, err
 			}
@@ -166,7 +141,7 @@ func (s *Storage) ModuleResources(ctx context.Context, module string, version st
 				return nil, err
 			}
 		}
-		stat, err := s.minioClient.StatObject(ctx, modulesBucket, object.Key, minio.StatObjectOptions{})
+		stat, err := s.minioClient.StatObject(ctx, s.bucket, object.Key, minio.StatObjectOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -174,14 +149,14 @@ func (s *Storage) ModuleResources(ctx context.Context, module string, version st
 			Name:     path.Base(object.Key),
 			MimeType: stat.ContentType,
 			Data:     bts,
-			Uri:      fmt.Sprintf("%s/%s", modulesBucket, object.Key),
+			Uri:      fmt.Sprintf("%s/%s", s.bucket, object.Key),
 		})
 	}
 	return files, nil
 }
 
 func (s *Storage) checkObjectExists(ctx context.Context, objectName string) bool {
-	_, err := s.minioClient.StatObject(ctx, modulesBucket, objectName, minio.StatObjectOptions{})
+	_, err := s.minioClient.StatObject(ctx, s.bucket, objectName, minio.StatObjectOptions{})
 	if err != nil {
 		return false
 	}
@@ -190,7 +165,26 @@ func (s *Storage) checkObjectExists(ctx context.Context, objectName string) bool
 
 func (s *Storage) GetModule(ctx context.Context, name string, loadData bool) (*internal.Module, error) {
 	objectName := moduleManifestObjectNameFromString(name)
-	manifestObj, err := s.minioClient.GetObject(ctx, modulesBucket, objectName, minio.GetObjectOptions{})
+	return s.loadModule(ctx, objectName, loadData)
+}
+
+func (s *Storage) GetModules(ctx context.Context, loadData bool) (modules []*internal.Module, err error) {
+	for object := range s.minioClient.ListObjects(ctx, s.bucket, minio.ListObjectsOptions{Recursive: true}) {
+		isManifestObj := strings.HasSuffix(object.Key, manifestSuffix)
+		if isManifestObj {
+			var module *internal.Module
+			module, err = s.loadModule(ctx, object.Key, loadData)
+			if err != nil {
+				return nil, err
+			}
+			modules = append(modules, module)
+		}
+	}
+	return
+}
+
+func (s *Storage) loadModule(ctx context.Context, objectName string, loadData bool) (*internal.Module, error) {
+	manifestObj, err := s.minioClient.GetObject(ctx, s.bucket, objectName, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -222,25 +216,42 @@ func (s *Storage) Close() error {
 }
 
 func (s *Storage) setup() {
-	exists, err := s.minioClient.BucketExists(context.Background(), modulesBucket)
+	exists, err := s.minioClient.BucketExists(context.Background(), s.bucket)
 	if err != nil {
 		s.logger.Fatal(err)
 	}
 	if !exists {
-		err = s.minioClient.MakeBucket(context.Background(), modulesBucket, minio.MakeBucketOptions{})
+		err = s.minioClient.MakeBucket(context.Background(), s.bucket, minio.MakeBucketOptions{})
 		if err != nil {
 			s.logger.Fatal(err)
-		}
-		readOnlyPolicy := `{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject"],"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::` + modulesBucket + `/*"],"Sid": ""}]}`
-		err = s.minioClient.SetBucketPolicy(context.Background(), modulesBucket, readOnlyPolicy)
-		if err != nil {
-			s.logger.Fatal(err)
-			return
 		}
 		s.logger.Info("Modules bucket setup complete")
 	} else {
 		s.logger.Info("Modules bucket verified")
 	}
+
+	policy, err := s.minioClient.GetBucketPolicy(context.Background(), s.bucket)
+	if err != nil {
+		return
+	}
+	if policy == "" {
+		readOnlyPolicy := s.readOnlyPolicy()
+		s.logger.Info("Updating bucket policy from '", policy, "' to '", readOnlyPolicy, "'")
+		err = s.minioClient.SetBucketPolicy(context.Background(), s.bucket, readOnlyPolicy)
+		if err != nil {
+			s.logger.Fatal(err)
+			return
+		}
+		s.logger.Info("Bucket policy updated")
+	}
+}
+
+func (s *Storage) readOnlyPolicy() string {
+	if customPolicy := os.Getenv("S3_BUCKET_POLICY"); customPolicy != "" {
+		return customPolicy
+	}
+	// minio and AWS default
+	return `{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject"],"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::` + s.bucket + `/*"],"Sid": ""}]}`
 }
 
 func moduleManifestObjectName(module string) string {

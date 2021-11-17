@@ -18,7 +18,7 @@ message GetModuleRequest {
 }
 
 message GetModuleResponse {
-  Module module = 1;
+  repeated Module module = 1;
 }
 
 message GetUrlRequest {

@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/gorilla/handlers v1.5.1
+	github.com/jedib0t/go-pretty/v6 v6.2.4
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.8.1
