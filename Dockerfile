@@ -1,5 +1,5 @@
 # Multi-stage build setup (https://docs.docker.com/develop/develop-images/multistage-build/)
-ARG TARGET=cli
+ARG TARGET=registry
 
 # Stage 1 (to create a "build" image, ~850MB)
 FROM golang:1.16 AS builder
