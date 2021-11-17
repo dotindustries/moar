@@ -1,18 +1,24 @@
-# moar
+## moar
 
-moar (pronounce "more") is a modular augmentation registry for VueJS and ReactJS.
+moar (pronounce "more") is a modular augmentation registry for VueJS and ReactJS apps.
+The registry is a central hub for managing module (remote component) versions.
 
-# But why?
+Grants the ability to use remote components and switch between versions without redeploying the frontend application. The registry focuses on:
+- Use of [Semantic Versions](http://semver.org/)
+- Storing and serving multiple versions of a module
+- Accessing modules by using version constraints (e.g. `1.2.x` is equivalent to `>= 1.2.0, < 1.3.0`) [Semver constraints](SEMVER.md)
 
-Based on [Distributed vue applications](https://markus.oberlehner.net/blog/distributed-vue-applications-loading-components-via-http/)
-by Markus Oberlehner this registry is a central hub for managing UMD modules for VueJS and ReactJS applications.
+## dependencies
 
-# Try it
+- minio for module storage
+- reverse-proxy for serving modules (e.g. nginx)
+
+## try it
 
 1. Clone this repository
-2. Start a dev instance of moar with docker compose:
+2. Start an instance of moar with docker compose:
     ```bash
-    docker-compose -f ./docker/docker-compose.yml up
+    cd docker & docker-compose up
     ```
 3. Clone the Vue example repository
     ```bash
@@ -20,26 +26,27 @@ by Markus Oberlehner this registry is a central hub for managing UMD modules for
     ```
    1. Install moar-cli
       ```bash
-      brew install moar
+      brew install dotindustries/tap/moarctl
       ```
    2. Create your first module: 
        ```bash
-       moar m c HelloWorld -a author@domain.com -l vue
+       moarctl m c HelloWorld -a author@domain.com -l vue
        ```
    3. Upload a version of the module
        ```bash
-       moar v upload -m HelloWorld -v 0.0.1+1394b72e1ef0fdc7b047 server/components/HelloWorld/HelloWorld.1394b72e1ef0fdc7b047.umd.min.js server/components/HelloWorld/HelloWorld.1394b72e1ef0fdc7b047.css
+       moarctl v upload -m HelloWorld -v 0.0.1+1394b72e1ef0fdc7b047 server/components/HelloWorld/HelloWorld.1394b72e1ef0fdc7b047.umd.min.js server/components/HelloWorld/HelloWorld.1394b72e1ef0fdc7b047.css
        ```
-4. Making sure everything is in place:
-   <details>
-    <summary>Click to expand: via curl</summary>
+4. Verify that everything is in place:
    
+    Query:
+
     ```bash
       curl --request POST \
       --url http://localhost:8000/moarpb.ModuleRegistry/GetModule \
       --header 'Content-Type: application/json' \
       --data '{"moduleName": "HelloWorld"}' | jq
     ```
+    Response:
 
     ```json
     {
@@ -59,7 +66,6 @@ by Markus Oberlehner this registry is a central hub for managing UMD modules for
       }
     }
     ```
-   </details>
 
     Or by running the hello world Vue application:
     ```bash
