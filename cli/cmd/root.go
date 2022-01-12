@@ -31,6 +31,7 @@ const (
 var cfgFile string
 var reverseProxyAddr string
 var debug bool
+var backendAddr string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -62,7 +63,8 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.moar.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.moar.yaml)")
+	rootCmd.PersistentFlags().StringVar(&backendAddr, "addr", "http://localhost:8000", "The backend service address")
 	rootCmd.PersistentFlags().StringVarP(&reverseProxyAddr, "proxy", "p", "", "The reverse proxy which is directed at the module storage.")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Toggles whether debug logs are enabled")
 }

@@ -24,10 +24,9 @@ var versionCmd = &cobra.Command{
 }
 
 var (
-	backendAddr string
-	module      string
-	version     string
-	uploadCmd   = &cobra.Command{
+	module    string
+	version   string
+	uploadCmd = &cobra.Command{
 		Use:     "upload",
 		Short:   "Uploads a new module version to the registry",
 		Aliases: []string{"up"},
@@ -116,7 +115,6 @@ func protobufClient() moarpb.ModuleRegistry {
 }
 
 func init() {
-	uploadCmd.Flags().StringVarP(&backendAddr, "addr", "a", "http://localhost:8000", "The backend service address")
 	uploadCmd.Flags().StringVarP(&module, "module", "m", "", "The target module name")
 	uploadCmd.Flags().StringVarP(&version, "version", "v", "", "The target version to upload")
 	err := uploadCmd.MarkFlagRequired("module")
