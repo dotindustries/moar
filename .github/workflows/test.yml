@@ -18,3 +18,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Test
         run: go test ./...
+      - name: Integration test
+        run: |
+          curl -LO https://github.com/Orange-OpenSource/hurl/releases/download/1.4.0/hurl_1.4.0_amd64.deb
+          sudo dpkg -i hurl_1.4.0_amd64.deb
+          integration/run.sh
