@@ -1,0 +1,37 @@
+schema: >-
+  definition user {}
+
+
+  definition organization {
+      relation admin : user
+
+      permission create_module = admin
+      permission manage_modules = admin
+  }
+
+
+  definition module {
+      relation author: user
+      relation organization: organization
+      relation contributor: user
+
+      permission upload_version = contributor + author
+      permission delete_module = organization->admin
+  }
+
+
+  definition version {
+      relation module: module
+      
+      permission delete_version = module->contributor + module->author
+  }
+relationships: >+
+  organization:moar_demo#admin@user:moarctl#...
+
+assertions:
+  assertTrue:
+    - organization:moar_demo#create_module@user:moarctl
+  assertFalse: []
+validation:
+  organization:moar_demo#create_module:
+    - "[user:moarctl] is <organization:moar_demo#admin>"
