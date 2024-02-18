@@ -17,7 +17,7 @@ jobs:
       release_body: ${{ steps.release.outputs.RELEASE_BODY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -44,14 +44,14 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       -
         name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.20
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
