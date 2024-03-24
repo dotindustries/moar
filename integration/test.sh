@@ -2,4 +2,4 @@
 set -eu
 
 echo "Running Hurl tests"
-hurl *.hurl --test
+hurl integration/*.hurl --test

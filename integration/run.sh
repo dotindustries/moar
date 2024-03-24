@@ -7,9 +7,9 @@ echo "Starting moar registry"
 # docker run --name moar --rm --detach --publish 8000:8000 dotindustries/moar-registry:latest
 S3_ACCESS_KEY_ID=minio S3_SECRET_ACCESS_KEY=minio123 go run cli/main.go -c docker/.dev.yaml up -d > /dev/null 2>&1 &
 
-source wait.sh
+source integration/wait.sh
 
-source test.sh
+source integration/test.sh
 
 echo "Stopping moar instance"
 kill %1
