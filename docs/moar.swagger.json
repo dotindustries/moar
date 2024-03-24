@@ -174,10 +174,6 @@
     }
   },
   "definitions": {
-    "moarpb_bytes": {
-      "type": "string",
-      "format": "byte"
-    },
     "moarpb_CreateModuleRequest": {
       "description": "Fields: moduleName, author, language",
       "type": "object",
@@ -228,7 +224,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "$ref": "#/definitions/moarpb_bytes"
+          "type": "string",
+          "format": "byte"
         },
         "mimeType": {
           "type": "string"
