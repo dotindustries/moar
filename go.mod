@@ -17,7 +17,7 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/twitchtv/twirp v8.1.0+incompatible
 	go.etcd.io/etcd/client/v3 v3.5.0
-	google.golang.org/protobuf v1.30.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
