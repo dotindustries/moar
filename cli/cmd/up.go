@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"github.com/dotindustries/moar/auth"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -9,6 +8,9 @@ import (
 	"github.com/newrelic/go-agent/v3/newrelic"
 	"net/http"
 	"os"
+	"strconv"
+	"sync"
+	"time"
 
 	"github.com/dotindustries/moar/internal/registry"
 	"github.com/dotindustries/moar/internal/storage/s3"
@@ -65,9 +67,17 @@ var upCmd = &cobra.Command{
 		loggingHandler := handlers.CombinedLoggingHandler(os.Stdout, twirpHandler)
 
 		e := echo.New()
-		e.Use(middleware.KeyAuth(auth.KeyValidator))
+
+		s := NewStats()
+		e.Use(s.Process)
+		e.GET("/stats", s.Handle) // Endpoint to get stats
+
+		e.Use(middleware.RequestID())
 		e.Use(nrecho.Middleware(app))
-		e.Any("*", echo.WrapHandler(loggingHandler))
+		e.GET("/", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, "I'm up")
+		})
+		e.Any("*", echo.WrapHandler(loggingHandler), middleware.KeyAuth(auth.KeyValidator))
 		logrus.Infof("Registry listening on http://%s/", host)
 		if err := http.ListenAndServe(host, e); err != nil {
 			logrus.Fatal(err)
@@ -84,13 +94,42 @@ func apm() (*newrelic.Application, error) {
 	)
 }
 
-func newAPMInterceptor() twirp.Interceptor {
-	return func(next twirp.Method) twirp.Method {
-		return func(ctx context.Context, req interface{}) (interface{}, error) {
-
-			return next(ctx, req)
-		}
+type (
+	Stats struct {
+		Uptime       time.Time      `json:"uptime"`
+		RequestCount uint64         `json:"requestCount"`
+		Statuses     map[string]int `json:"statuses"`
+		mutex        sync.RWMutex
 	}
+)
+
+func NewStats() *Stats {
+	return &Stats{
+		Uptime:   time.Now(),
+		Statuses: map[string]int{},
+	}
+}
+
+// Process is the middleware function.
+func (s *Stats) Process(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if err := next(c); err != nil {
+			c.Error(err)
+		}
+		s.mutex.Lock()
+		defer s.mutex.Unlock()
+		s.RequestCount++
+		status := strconv.Itoa(c.Response().Status)
+		s.Statuses[status]++
+		return nil
+	}
+}
+
+// Handle is the endpoint to get stats.
+func (s *Stats) Handle(c echo.Context) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	return c.JSON(http.StatusOK, s)
 }
 
 func init() {
