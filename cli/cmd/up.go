@@ -1,8 +1,16 @@
 package cmd
 
 import (
+	"github.com/dotindustries/moar/auth"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/newrelic/go-agent/v3/integrations/nrecho-v4"
+	"github.com/newrelic/go-agent/v3/newrelic"
 	"net/http"
 	"os"
+	"strconv"
+	"sync"
+	"time"
 
 	"github.com/dotindustries/moar/internal/registry"
 	"github.com/dotindustries/moar/internal/storage/s3"
@@ -12,7 +20,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/twitchtv/twirp"
-	"go.elastic.co/apm/module/apmhttp"
 )
 
 var (
@@ -48,16 +55,81 @@ var upCmd = &cobra.Command{
 			VersionOverwriteEnabled: versionOverwriteEnabled,
 		})
 
-		twirpHandler := moarpb.NewModuleRegistryServer(server, twirp.WithServerPathPrefix(""))
-		tracedHandler := apmhttp.Wrap(twirpHandler)
-		loggingHandler := handlers.CombinedLoggingHandler(os.Stdout, tracedHandler)
+		// Echo instance
+		app, err := apm()
+		if err != nil {
+			panic(err)
+		}
+
+		twirpHandler := moarpb.NewModuleRegistryServer(server,
+			twirp.WithServerPathPrefix(""),
+		)
+		loggingHandler := handlers.CombinedLoggingHandler(os.Stdout, twirpHandler)
+
+		e := echo.New()
+
+		s := NewStats()
+		e.Use(s.Process)
+		e.GET("/stats", s.Handle) // Endpoint to get stats
+
+		e.Use(middleware.RequestID())
+		e.Use(nrecho.Middleware(app))
+		e.GET("/", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, "I'm up")
+		})
+		e.Any("*", echo.WrapHandler(loggingHandler), middleware.KeyAuth(auth.KeyValidator))
 		logrus.Infof("Registry listening on http://%s/", host)
-		if err := http.ListenAndServe(host, loggingHandler); err != nil {
+		if err := http.ListenAndServe(host, e); err != nil {
 			logrus.Fatal(err)
 		}
 
 		server.Shutdown()
 	},
+}
+
+func apm() (*newrelic.Application, error) {
+	return newrelic.NewApplication(
+		newrelic.ConfigAppLogForwardingEnabled(true),
+		newrelic.ConfigFromEnvironment(),
+	)
+}
+
+type (
+	Stats struct {
+		Uptime       time.Time      `json:"uptime"`
+		RequestCount uint64         `json:"requestCount"`
+		Statuses     map[string]int `json:"statuses"`
+		mutex        sync.RWMutex
+	}
+)
+
+func NewStats() *Stats {
+	return &Stats{
+		Uptime:   time.Now(),
+		Statuses: map[string]int{},
+	}
+}
+
+// Process is the middleware function.
+func (s *Stats) Process(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if err := next(c); err != nil {
+			c.Error(err)
+		}
+		s.mutex.Lock()
+		defer s.mutex.Unlock()
+		s.RequestCount++
+		status := strconv.Itoa(c.Response().Status)
+		s.Statuses[status]++
+		return nil
+	}
+}
+
+// Handle is the endpoint to get stats.
+func (s *Stats) Handle(c echo.Context) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	return c.JSON(http.StatusOK, s)
 }
 
 func init() {
