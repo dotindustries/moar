@@ -2,7 +2,7 @@
 ARG TARGET=registry
 
 # Stage 1 (to create a "build" image, ~850MB)
-FROM golang:1.20 AS builder
+FROM golang:1.21 AS builder
 RUN go version
 
 WORKDIR /moar/
