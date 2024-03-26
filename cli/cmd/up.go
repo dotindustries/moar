@@ -77,7 +77,11 @@ var upCmd = &cobra.Command{
 		e.GET("/", func(c echo.Context) error {
 			return c.JSON(http.StatusOK, "I'm up")
 		})
-		e.Any("*", echo.WrapHandler(loggingHandler), middleware.KeyAuth(auth.KeyValidator))
+		e.Any("*", echo.WrapHandler(loggingHandler), middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+			// Allow for both Authorization and X-Api-Key header
+			KeyLookup: "header:" + echo.HeaderAuthorization + ",header:X-Api-Key",
+			Validator: auth.KeyValidator,
+		}))
 		logrus.Infof("Registry listening on http://%s/", host)
 		if err := http.ListenAndServe(host, e); err != nil {
 			logrus.Fatal(err)
