@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"fmt"
+	"github.com/dotindustries/moar/moarpb/v1/moarpbconnect"
 	"io/ioutil"
 	"mime"
 	"os"
@@ -11,10 +13,9 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/dotindustries/moar/client"
-	"github.com/dotindustries/moar/moarpb"
+	"github.com/dotindustries/moar/moarpb/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/twitchtv/twirp"
 )
 
 var versionCmd = &cobra.Command{
@@ -71,11 +72,11 @@ var (
 				}
 			}
 			// TODO validate that at least 1 js file is available
-			_, err = client.UploadVersion(context.Background(), &moarpb.UploadVersionRequest{
+			_, err = client.UploadVersion(context.Background(), connect.NewRequest(&moarpb.UploadVersionRequest{
 				ModuleName: module,
 				Version:    version,
 				Files:      files,
-			})
+			}))
 
 			if err != nil {
 				fmt.Println("ERROR: ", err)
@@ -110,8 +111,8 @@ func MustReadFileBytes(path string) []byte {
 	return bytes
 }
 
-func protobufClient() moarpb.ModuleRegistry {
-	return client.New(client.Config{Url: backendAddr}, twirp.WithClientPathPrefix(""))
+func protobufClient() moarpbconnect.ModuleRegistryServiceClient {
+	return client.New(client.Config{Url: backendAddr})
 }
 
 func init() {

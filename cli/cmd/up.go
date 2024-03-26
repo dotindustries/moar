@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"github.com/dotindustries/moar/auth"
+	"github.com/dotindustries/moar/moarpb/v1/moarpbconnect"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/newrelic/go-agent/v3/integrations/nrecho-v4"
 	"github.com/newrelic/go-agent/v3/newrelic"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"net/http"
 	"os"
 	"strconv"
@@ -14,12 +17,10 @@ import (
 
 	"github.com/dotindustries/moar/internal/registry"
 	"github.com/dotindustries/moar/internal/storage/s3"
-	"github.com/dotindustries/moar/moarpb"
 	"github.com/dotindustries/moar/rpc"
 	"github.com/gorilla/handlers"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/twitchtv/twirp"
 )
 
 var (
@@ -61,11 +62,6 @@ var upCmd = &cobra.Command{
 			panic(err)
 		}
 
-		twirpHandler := moarpb.NewModuleRegistryServer(server,
-			twirp.WithServerPathPrefix(""),
-		)
-		loggingHandler := handlers.CombinedLoggingHandler(os.Stdout, twirpHandler)
-
 		e := echo.New()
 
 		s := NewStats()
@@ -77,13 +73,19 @@ var upCmd = &cobra.Command{
 		e.GET("/", func(c echo.Context) error {
 			return c.JSON(http.StatusOK, "I'm up")
 		})
-		e.Any("*", echo.WrapHandler(loggingHandler), middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+		path, handler := moarpbconnect.NewModuleRegistryServiceHandler(server)
+		loggingHandler := handlers.CombinedLoggingHandler(os.Stdout, handler)
+		e.Any(path, echo.WrapHandler(loggingHandler), middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 			// Allow for both Authorization and X-Api-Key header
 			KeyLookup: "header:" + echo.HeaderAuthorization + ",header:X-Api-Key",
 			Validator: auth.KeyValidator,
 		}))
 		logrus.Infof("Registry listening on http://%s/", host)
-		if err := http.ListenAndServe(host, e); err != nil {
+		if err := http.ListenAndServe(
+			host,
+			// Use h2c so we can serve HTTP/2 without TLS.
+			h2c.NewHandler(e, &http2.Server{}),
+		); err != nil {
 			logrus.Fatal(err)
 		}
 
