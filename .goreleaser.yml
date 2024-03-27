@@ -28,11 +28,11 @@ changelog:
       - '^test:'
 brews:
   - name: moarctl
-    tap:
+    repository:
       owner: dotindustries
       name: homebrew-tap
       branch: master
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+      # token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     folder: Formula
     homepage: "https://github.com/dotindustries/homebrew-tap"
     description: "Cli app to for working with moar registry"
