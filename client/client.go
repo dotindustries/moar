@@ -20,5 +20,6 @@ func New(config Config, opts ...connect.ClientOption) moarpbconnect.ModuleRegist
 	return moarpbconnect.NewModuleRegistryServiceClient(
 		httpCli,
 		config.Url,
+		opts...,
 	)
 }
