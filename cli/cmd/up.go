@@ -57,11 +57,6 @@ var upCmd = &cobra.Command{
 		})
 
 		// Echo instance
-		app, err := apm()
-		if err != nil {
-			panic(err)
-		}
-
 		e := echo.New()
 
 		s := NewStats()
@@ -69,7 +64,14 @@ var upCmd = &cobra.Command{
 		e.GET("/stats", s.Handle) // Endpoint to get stats
 
 		e.Use(middleware.RequestID())
-		e.Use(nrecho.Middleware(app))
+		if os.Getenv("NEW_RELIC_LICENSE_KEY") != "" {
+			app, err := apm()
+			if err != nil {
+				panic(err)
+			}
+			e.Use(nrecho.Middleware(app))
+		}
+
 		e.GET("/", func(c echo.Context) error {
 			return c.JSON(http.StatusOK, "I'm up")
 		})
