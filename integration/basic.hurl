@@ -1,4 +1,3 @@
 GET http://localhost:8000/stats
-Content-Type: application/json
-{}
 HTTP 200
+Content-Type: application/json

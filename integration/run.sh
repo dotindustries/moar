@@ -2,7 +2,9 @@
 set -eu
 
 echo "Starting dev env"
-docker-compose -f ./docker/docker-compose-dev.yml up -d --wait
+docker-compose -f ./docker/docker-compose-dev.yml up -d
+
+source integration/wait.sh
 
 source integration/test.sh
 
