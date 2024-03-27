@@ -143,7 +143,7 @@ func (s *Stats) Handle(c echo.Context) error {
 func init() {
 	upCmd.Flags().StringVar(&moduleStorageType, "storage_type", "s3", "Defines what storage type to use. Possible values: s3")
 	upCmd.Flags().StringVar(&storageAddress, "storage_addr", "", "The address to reach the storage")
-	upCmd.Flags().StringVar(&host, "host", ":8000", "The address to bind the server to")
+	upCmd.Flags().StringVar(&host, "host", "0.0.0.0:8000", "The address to bind the server to")
 	upCmd.Flags().BoolVar(&versionOverwriteEnabled, "overwrite", false, "Toggles whether version overwrite is enabled")
 	rootCmd.AddCommand(upCmd)
 }
