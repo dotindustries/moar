@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "moar",
-    "description": "THIS IS FROM BASE!",
+    "description": "moar (pronounce \"more\") is a modular augmentation registry for VueJS and ReactJS.",
     "version": "v1.0.0"
   },
   "paths": {
