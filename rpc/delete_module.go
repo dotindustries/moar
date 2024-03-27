@@ -1,30 +1,32 @@
 package rpc
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/dotindustries/moar/internal/registry"
-	"github.com/dotindustries/moar/moarpb"
-	"github.com/twitchtv/twirp"
+	moarpb "github.com/dotindustries/moar/moarpb/v1"
 )
 
-func (s *Server) DeleteModule(ctx context.Context, request *moarpb.DeleteModuleRequest) (*moarpb.DeleteModuleResponse, error) {
+func (s *Server) DeleteModule(ctx context.Context, c *connect.Request[moarpb.DeleteModuleRequest]) (*connect.Response[moarpb.DeleteModuleResponse], error) {
+	request := c.Msg
 	if request.ModuleName == "" {
-		return nil, twirp.RequiredArgumentError("moduleName")
+		return nil, requiredArgumentError("moduleName")
 	}
 
 	module, err := s.registry.GetModule(ctx, request.ModuleName, false)
 	if errors.Is(err, registry.ModuleNotFound) {
-		return nil, twirp.NotFoundError("module not found: " + request.ModuleName)
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("module not found: "+request.ModuleName))
 	} else if err != nil {
-		return nil, twirp.InternalErrorWith(err)
+		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	err = s.registry.DeleteModule(ctx, module)
 	if err != nil {
-		return nil, twirp.InternalErrorWith(err)
+		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	return &moarpb.DeleteModuleResponse{}, nil
+	return connect.NewResponse(&moarpb.DeleteModuleResponse{}), nil
 }

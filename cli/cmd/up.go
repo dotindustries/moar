@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"github.com/dotindustries/moar/auth"
+	"github.com/dotindustries/moar/moarpb/v1/v1connect"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/newrelic/go-agent/v3/integrations/nrecho-v4"
 	"github.com/newrelic/go-agent/v3/newrelic"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"net/http"
 	"os"
 	"strconv"
@@ -14,12 +17,10 @@ import (
 
 	"github.com/dotindustries/moar/internal/registry"
 	"github.com/dotindustries/moar/internal/storage/s3"
-	"github.com/dotindustries/moar/moarpb"
 	"github.com/dotindustries/moar/rpc"
 	"github.com/gorilla/handlers"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/twitchtv/twirp"
 )
 
 var (
@@ -56,16 +57,6 @@ var upCmd = &cobra.Command{
 		})
 
 		// Echo instance
-		app, err := apm()
-		if err != nil {
-			panic(err)
-		}
-
-		twirpHandler := moarpb.NewModuleRegistryServer(server,
-			twirp.WithServerPathPrefix(""),
-		)
-		loggingHandler := handlers.CombinedLoggingHandler(os.Stdout, twirpHandler)
-
 		e := echo.New()
 
 		s := NewStats()
@@ -73,17 +64,30 @@ var upCmd = &cobra.Command{
 		e.GET("/stats", s.Handle) // Endpoint to get stats
 
 		e.Use(middleware.RequestID())
-		e.Use(nrecho.Middleware(app))
-		e.GET("/", func(c echo.Context) error {
-			return c.JSON(http.StatusOK, "I'm up")
-		})
-		e.Any("*", echo.WrapHandler(loggingHandler), middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+		if os.Getenv("NEW_RELIC_LICENSE_KEY") != "" {
+			app, err := apm()
+			if err != nil {
+				panic(err)
+			}
+			e.Use(nrecho.Middleware(app))
+		}
+
+		path, handler := v1connect.NewModuleRegistryServiceHandler(server)
+		loggingHandler := handlers.CombinedLoggingHandler(os.Stdout, handler)
+		e.POST(path+"*", echo.WrapHandler(loggingHandler), middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 			// Allow for both Authorization and X-Api-Key header
 			KeyLookup: "header:" + echo.HeaderAuthorization + ",header:X-Api-Key",
 			Validator: auth.KeyValidator,
 		}))
-		logrus.Infof("Registry listening on http://%s/", host)
-		if err := http.ListenAndServe(host, e); err != nil {
+		e.GET("/", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, "I'm up")
+		})
+		logrus.Infof("Registry listening on http://%s/ with path: %s", host, path)
+		if err := http.ListenAndServe(
+			host,
+			// Use h2c so we can serve HTTP/2 without TLS.
+			h2c.NewHandler(e, &http2.Server{}),
+		); err != nil {
 			logrus.Fatal(err)
 		}
 
@@ -139,7 +143,7 @@ func (s *Stats) Handle(c echo.Context) error {
 func init() {
 	upCmd.Flags().StringVar(&moduleStorageType, "storage_type", "s3", "Defines what storage type to use. Possible values: s3")
 	upCmd.Flags().StringVar(&storageAddress, "storage_addr", "", "The address to reach the storage")
-	upCmd.Flags().StringVar(&host, "host", ":8000", "The address to bind the server to")
+	upCmd.Flags().StringVar(&host, "host", "0.0.0.0:8000", "The address to bind the server to")
 	upCmd.Flags().BoolVar(&versionOverwriteEnabled, "overwrite", false, "Toggles whether version overwrite is enabled")
 	rootCmd.AddCommand(upCmd)
 }

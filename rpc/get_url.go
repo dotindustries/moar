@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"errors"
 	"fmt"
@@ -8,27 +9,27 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/dotindustries/moar/internal"
 	"github.com/dotindustries/moar/internal/registry"
-	"github.com/dotindustries/moar/moarpb"
-	"github.com/twitchtv/twirp"
+	moarpb "github.com/dotindustries/moar/moarpb/v1"
 )
 
-func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*moarpb.GetUrlResponse, error) {
+func (s *Server) GetUrl(ctx context.Context, c *connect.Request[moarpb.GetUrlRequest]) (*connect.Response[moarpb.GetUrlResponse], error) {
+	request := c.Msg
 	if request.ModuleName == "" {
-		return nil, twirp.RequiredArgumentError("moduleName")
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("invalid argument: %s", "module_name"))
 	}
 
 	// 1. check if module exists in registry
 	module, err := s.registry.GetModule(ctx, request.ModuleName, false)
 	if err != nil {
 		if errors.Is(err, registry.ModuleNotFound) {
-			return nil, twirp.NotFoundError("module not found: " + request.ModuleName)
+			return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("module not found: "+request.ModuleName))
 		}
 		s.logger.Warnf("Module not found: %s: %v", request.ModuleName, err)
-		return nil, twirp.InternalError(err.Error())
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	if len(module.Versions) == 0 {
-		return nil, twirp.NotFoundError("module has no versions")
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("module has no versions"))
 	}
 
 	var version *internal.Version
@@ -44,16 +45,16 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 		}
 		v, err := semver.NewVersion(versionString)
 		if err != nil {
-			return nil, twirp.WrapError(twirp.InvalidArgumentError("version", "version invalid"), err)
+			return nil, connect.NewError(connect.CodeInvalidArgument, err)
 		}
 		if v != nil && !module.HasVersion(v) {
-			return nil, twirp.NotFoundError("module version not found: " + request.ModuleName + "@" + v.String())
+			return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("module version not found: "+request.ModuleName+"@"+v.String()))
 		}
 		version = module.SetSelectedVersion(v)
 	case *moarpb.GetUrlRequest_VersionConstraint:
 		constraint, err := semver.NewConstraint(request.GetVersionConstraint())
 		if err != nil {
-			return nil, twirp.WrapError(twirp.InvalidArgumentError("versionConstraint", "constraint invalid"), err)
+			return nil, connect.NewError(connect.CodeInvalidArgument, err)
 		}
 		version = module.SelectVersion(constraint)
 		selectedVersionString = version.Version().String()
@@ -73,34 +74,9 @@ func (s *Server) GetUrl(ctx context.Context, request *moarpb.GetUrlRequest) (*mo
 	}
 	mod := moduleToDto(module)
 
-	return &moarpb.GetUrlResponse{
+	return connect.NewResponse(&moarpb.GetUrlResponse{
 		Resources:       resources,
 		Module:          mod,
 		SelectedVersion: selectedVersionString,
-	}, nil
-}
-
-func moduleToDto(module *internal.Module) *moarpb.Module {
-	var versions []*moarpb.Version
-	for _, v := range module.Versions {
-		var files []*moarpb.File
-		for _, file := range v.Files {
-			files = append(files, &moarpb.File{
-				Name:     file.Name,
-				MimeType: file.MimeType,
-				Data:     file.Data,
-			})
-		}
-		versions = append(versions, &moarpb.Version{
-			Name:  v.Value,
-			Files: files,
-		})
-	}
-	mod := &moarpb.Module{
-		Name:     module.Name,
-		Author:   module.Author,
-		Language: module.Language,
-		Versions: versions,
-	}
-	return mod
+	}), nil
 }

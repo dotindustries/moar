@@ -9,6 +9,10 @@ moar (pronounce "more") is a modular augmentation registry for VueJS and ReactJS
 Based on [Distributed vue applications](https://markus.oberlehner.net/blog/distributed-vue-applications-loading-components-via-http/)
 by Markus Oberlehner this registry is a central hub for managing modules (remote components) for VueJS and ReactJS applications.
 
+# Documentation
+
+[OpenAPI docs](https://openapi.moar.dot.industries)
+
 # Try it
 
 1. run docker-compose up in the ./docker directory to start the registry

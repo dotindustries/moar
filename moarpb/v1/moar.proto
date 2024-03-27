@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package moarpb;
+package moarpb.v1;
 
-option go_package = "github.com/dotindustries/moar/moarpb";
+option go_package = "github.com/dotindustries/moar/moarpb/v1";
 
-service ModuleRegistry {
+service ModuleRegistryService {
   rpc GetUrl(GetUrlRequest) returns (GetUrlResponse);
   rpc CreateModule(CreateModuleRequest) returns (CreateModuleResponse);
   rpc GetModule(GetModuleRequest) returns (GetModuleResponse);
@@ -14,7 +14,7 @@ service ModuleRegistry {
 }
 
 message GetModuleRequest {
-  string moduleName = 1;
+  string module_name = 1;
 }
 
 message GetModuleResponse {
@@ -22,9 +22,9 @@ message GetModuleResponse {
 }
 
 message GetUrlRequest {
-  string moduleName = 1;
-  oneof versionSelector {
-    string versionConstraint = 2;
+  string module_name = 1;
+  oneof version_selector {
+    string version_constraint = 2;
     string version = 3;
   }
 }
@@ -32,17 +32,17 @@ message GetUrlRequest {
 message VersionResource {
   string uri = 1;
   string name = 2;
-  string contentType = 3;
+  string content_type = 3;
 }
 
 message GetUrlResponse {
   repeated VersionResource resources = 1;
   Module module = 2;
-  string selectedVersion = 3;
+  string selected_version = 3;
 }
 
 message CreateModuleRequest {
-  string moduleName = 1;
+  string module_name = 1;
   string author = 2;
   string language = 3;
 }
@@ -52,7 +52,7 @@ message CreateModuleResponse {
 }
 
 message DeleteModuleRequest {
-  string moduleName = 1;
+  string module_name = 1;
 }
 
 message DeleteModuleResponse {
@@ -60,7 +60,7 @@ message DeleteModuleResponse {
 }
 
 message UploadVersionRequest {
-  string moduleName = 1;
+  string module_name = 1;
   string version = 2;
   repeated File files = 3;
 }
@@ -70,7 +70,7 @@ message UploadVersionResponse {
 }
 
 message DeleteVersionRequest {
-  string moduleName = 1;
+  string module_name = 1;
   string version = 2;
 }
 
@@ -92,6 +92,6 @@ message Version {
 
 message File {
   string name = 1;
-  string mimeType = 2;
+  string mime_type = 2;
   bytes data = 3;
 }

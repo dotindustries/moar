@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"fmt"
 	"os"
 
-	"github.com/dotindustries/moar/moarpb"
+	moarpb "github.com/dotindustries/moar/moarpb/v1"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
@@ -33,11 +34,12 @@ var getModuleCmd = &cobra.Command{
 			}
 			request.ModuleName = args[0]
 		}
-		response, err := client.GetModule(context.Background(), request)
+		rsp, err := client.GetModule(context.Background(), connect.NewRequest(request))
 		if err != nil {
 			fmt.Println("ERROR: ", err)
 			os.Exit(1)
 		}
+		response := rsp.Msg
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{"Module", "Author", "Language", "Version"})
@@ -64,11 +66,11 @@ var newModuleCmd = &cobra.Command{
 		client := protobufClient()
 
 		moduleName := args[0]
-		_, err = client.CreateModule(context.Background(), &moarpb.CreateModuleRequest{
+		_, err = client.CreateModule(context.Background(), connect.NewRequest(&moarpb.CreateModuleRequest{
 			ModuleName: moduleName,
 			Author:     author,
 			Language:   language,
-		})
+		}))
 		if err != nil {
 			fmt.Println("ERROR: ", err)
 			os.Exit(1)

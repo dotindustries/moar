@@ -1,0 +1,13 @@
+version: v1
+plugins:
+  - plugin: buf.build/protocolbuffers/go
+    out: .
+    opt: paths=source_relative
+  - plugin: buf.build/connectrpc/go:v1.16.0
+    out: .
+    opt: paths=source_relative
+  - plugin: connect-openapi
+    out: docs
+    opt:
+      - format=json
+      - base=docs/swagger.base.yaml

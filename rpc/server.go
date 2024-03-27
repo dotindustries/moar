@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"context"
-
 	"github.com/Masterminds/semver"
 	"github.com/dotindustries/moar/internal"
 	"github.com/sirupsen/logrus"
