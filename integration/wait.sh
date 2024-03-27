@@ -8,7 +8,7 @@ wait_for_url () {
     total_in_s=0
     while [ $total_in_s -le "$max_in_s" ]
     do
-        if (printf "GET %s\n{}\nHTTP 200" "$1" | hurl) then
+        if (echo "GET $1\n{}\nHTTP 200" | hurl) then
             return 0
         fi
         total_in_s=$(( total_in_s +  delay_in_s))
