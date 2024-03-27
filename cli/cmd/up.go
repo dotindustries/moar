@@ -72,17 +72,17 @@ var upCmd = &cobra.Command{
 			e.Use(nrecho.Middleware(app))
 		}
 
-		e.GET("/", func(c echo.Context) error {
-			return c.JSON(http.StatusOK, "I'm up")
-		})
 		path, handler := v1connect.NewModuleRegistryServiceHandler(server)
 		loggingHandler := handlers.CombinedLoggingHandler(os.Stdout, handler)
-		e.Any(path, echo.WrapHandler(loggingHandler), middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+		e.POST(path+"*", echo.WrapHandler(loggingHandler), middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 			// Allow for both Authorization and X-Api-Key header
 			KeyLookup: "header:" + echo.HeaderAuthorization + ",header:X-Api-Key",
 			Validator: auth.KeyValidator,
 		}))
-		logrus.Infof("Registry listening on http://%s/", host)
+		e.GET("/", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, "I'm up")
+		})
+		logrus.Infof("Registry listening on http://%s/ with path: %s", host, path)
 		if err := http.ListenAndServe(
 			host,
 			// Use h2c so we can serve HTTP/2 without TLS.
