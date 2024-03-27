@@ -25,7 +25,7 @@ jobs:
         with:
           doc: moar
           token: ${{secrets.BUMP_DOC_TOKEN}}
-          file: docs/moar.swagger.json
+          file: docs/moarpb/v1/moar.openapi.json
   api-diff:
     if: ${{ github.event_name == 'pull_request' }}
     name: Check API diff on Bump.sh
@@ -38,7 +38,7 @@ jobs:
         with:
           doc: moar
           token: ${{secrets.BUMP_DOC_TOKEN}}
-          file: docs/moar.swagger.json
+          file: docs/moarpb/v1/moar.openapi.json
           command: diff
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

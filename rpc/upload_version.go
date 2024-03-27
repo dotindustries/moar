@@ -7,7 +7,7 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/dotindustries/moar/internal"
-	"github.com/dotindustries/moar/moarpb/v1"
+	moarpb "github.com/dotindustries/moar/moarpb/v1"
 )
 
 func (s *Server) UploadVersion(ctx context.Context, c *connect.Request[moarpb.UploadVersionRequest]) (*connect.Response[moarpb.UploadVersionResponse], error) {

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/dotindustries/moar/auth"
-	"github.com/dotindustries/moar/moarpb/v1/moarpbconnect"
+	"github.com/dotindustries/moar/moarpb/v1/v1connect"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/newrelic/go-agent/v3/integrations/nrecho-v4"
@@ -75,7 +75,7 @@ var upCmd = &cobra.Command{
 		e.GET("/", func(c echo.Context) error {
 			return c.JSON(http.StatusOK, "I'm up")
 		})
-		path, handler := moarpbconnect.NewModuleRegistryServiceHandler(server)
+		path, handler := v1connect.NewModuleRegistryServiceHandler(server)
 		loggingHandler := handlers.CombinedLoggingHandler(os.Stdout, handler)
 		e.Any(path, echo.WrapHandler(loggingHandler), middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 			// Allow for both Authorization and X-Api-Key header

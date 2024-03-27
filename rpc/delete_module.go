@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/dotindustries/moar/internal/registry"
-	"github.com/dotindustries/moar/moarpb/v1"
+	moarpb "github.com/dotindustries/moar/moarpb/v1"
 )
 
 func (s *Server) DeleteModule(ctx context.Context, c *connect.Request[moarpb.DeleteModuleRequest]) (*connect.Response[moarpb.DeleteModuleResponse], error) {

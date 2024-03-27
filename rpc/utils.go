@@ -4,7 +4,7 @@ import (
 	"connectrpc.com/connect"
 	"fmt"
 	"github.com/dotindustries/moar/internal"
-	"github.com/dotindustries/moar/moarpb/v1"
+	moarpb "github.com/dotindustries/moar/moarpb/v1"
 )
 
 func requiredArgumentError(name string) error {

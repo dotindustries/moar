@@ -2,14 +2,13 @@
 //
 // Source: moarpb/v1/moar.proto
 
-package moarpbconnect
+package v1connect
 
 import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	"github.com/dotindustries/moar/moarpb/v1"
-
+	v1 "github.com/dotindustries/moar/moarpb/v1"
 	http "net/http"
 	strings "strings"
 )
@@ -56,7 +55,7 @@ const (
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	moduleRegistryServiceServiceDescriptor             = moarpb.File_moarpb_v1_moar_proto.Services().ByName("ModuleRegistryService")
+	moduleRegistryServiceServiceDescriptor             = v1.File_moarpb_v1_moar_proto.Services().ByName("ModuleRegistryService")
 	moduleRegistryServiceGetUrlMethodDescriptor        = moduleRegistryServiceServiceDescriptor.Methods().ByName("GetUrl")
 	moduleRegistryServiceCreateModuleMethodDescriptor  = moduleRegistryServiceServiceDescriptor.Methods().ByName("CreateModule")
 	moduleRegistryServiceGetModuleMethodDescriptor     = moduleRegistryServiceServiceDescriptor.Methods().ByName("GetModule")
@@ -67,12 +66,12 @@ var (
 
 // ModuleRegistryServiceClient is a client for the moarpb.v1.ModuleRegistryService service.
 type ModuleRegistryServiceClient interface {
-	GetUrl(context.Context, *connect.Request[moarpb.GetUrlRequest]) (*connect.Response[moarpb.GetUrlResponse], error)
-	CreateModule(context.Context, *connect.Request[moarpb.CreateModuleRequest]) (*connect.Response[moarpb.CreateModuleResponse], error)
-	GetModule(context.Context, *connect.Request[moarpb.GetModuleRequest]) (*connect.Response[moarpb.GetModuleResponse], error)
-	DeleteModule(context.Context, *connect.Request[moarpb.DeleteModuleRequest]) (*connect.Response[moarpb.DeleteModuleResponse], error)
-	UploadVersion(context.Context, *connect.Request[moarpb.UploadVersionRequest]) (*connect.Response[moarpb.UploadVersionResponse], error)
-	DeleteVersion(context.Context, *connect.Request[moarpb.DeleteVersionRequest]) (*connect.Response[moarpb.DeleteVersionResponse], error)
+	GetUrl(context.Context, *connect.Request[v1.GetUrlRequest]) (*connect.Response[v1.GetUrlResponse], error)
+	CreateModule(context.Context, *connect.Request[v1.CreateModuleRequest]) (*connect.Response[v1.CreateModuleResponse], error)
+	GetModule(context.Context, *connect.Request[v1.GetModuleRequest]) (*connect.Response[v1.GetModuleResponse], error)
+	DeleteModule(context.Context, *connect.Request[v1.DeleteModuleRequest]) (*connect.Response[v1.DeleteModuleResponse], error)
+	UploadVersion(context.Context, *connect.Request[v1.UploadVersionRequest]) (*connect.Response[v1.UploadVersionResponse], error)
+	DeleteVersion(context.Context, *connect.Request[v1.DeleteVersionRequest]) (*connect.Response[v1.DeleteVersionResponse], error)
 }
 
 // NewModuleRegistryServiceClient constructs a client for the moarpb.v1.ModuleRegistryService
@@ -85,37 +84,37 @@ type ModuleRegistryServiceClient interface {
 func NewModuleRegistryServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) ModuleRegistryServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &moduleRegistryServiceClient{
-		getUrl: connect.NewClient[moarpb.GetUrlRequest, moarpb.GetUrlResponse](
+		getUrl: connect.NewClient[v1.GetUrlRequest, v1.GetUrlResponse](
 			httpClient,
 			baseURL+ModuleRegistryServiceGetUrlProcedure,
 			connect.WithSchema(moduleRegistryServiceGetUrlMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		createModule: connect.NewClient[moarpb.CreateModuleRequest, moarpb.CreateModuleResponse](
+		createModule: connect.NewClient[v1.CreateModuleRequest, v1.CreateModuleResponse](
 			httpClient,
 			baseURL+ModuleRegistryServiceCreateModuleProcedure,
 			connect.WithSchema(moduleRegistryServiceCreateModuleMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		getModule: connect.NewClient[moarpb.GetModuleRequest, moarpb.GetModuleResponse](
+		getModule: connect.NewClient[v1.GetModuleRequest, v1.GetModuleResponse](
 			httpClient,
 			baseURL+ModuleRegistryServiceGetModuleProcedure,
 			connect.WithSchema(moduleRegistryServiceGetModuleMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		deleteModule: connect.NewClient[moarpb.DeleteModuleRequest, moarpb.DeleteModuleResponse](
+		deleteModule: connect.NewClient[v1.DeleteModuleRequest, v1.DeleteModuleResponse](
 			httpClient,
 			baseURL+ModuleRegistryServiceDeleteModuleProcedure,
 			connect.WithSchema(moduleRegistryServiceDeleteModuleMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		uploadVersion: connect.NewClient[moarpb.UploadVersionRequest, moarpb.UploadVersionResponse](
+		uploadVersion: connect.NewClient[v1.UploadVersionRequest, v1.UploadVersionResponse](
 			httpClient,
 			baseURL+ModuleRegistryServiceUploadVersionProcedure,
 			connect.WithSchema(moduleRegistryServiceUploadVersionMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		deleteVersion: connect.NewClient[moarpb.DeleteVersionRequest, moarpb.DeleteVersionResponse](
+		deleteVersion: connect.NewClient[v1.DeleteVersionRequest, v1.DeleteVersionResponse](
 			httpClient,
 			baseURL+ModuleRegistryServiceDeleteVersionProcedure,
 			connect.WithSchema(moduleRegistryServiceDeleteVersionMethodDescriptor),
@@ -126,52 +125,52 @@ func NewModuleRegistryServiceClient(httpClient connect.HTTPClient, baseURL strin
 
 // moduleRegistryServiceClient implements ModuleRegistryServiceClient.
 type moduleRegistryServiceClient struct {
-	getUrl        *connect.Client[moarpb.GetUrlRequest, moarpb.GetUrlResponse]
-	createModule  *connect.Client[moarpb.CreateModuleRequest, moarpb.CreateModuleResponse]
-	getModule     *connect.Client[moarpb.GetModuleRequest, moarpb.GetModuleResponse]
-	deleteModule  *connect.Client[moarpb.DeleteModuleRequest, moarpb.DeleteModuleResponse]
-	uploadVersion *connect.Client[moarpb.UploadVersionRequest, moarpb.UploadVersionResponse]
-	deleteVersion *connect.Client[moarpb.DeleteVersionRequest, moarpb.DeleteVersionResponse]
+	getUrl        *connect.Client[v1.GetUrlRequest, v1.GetUrlResponse]
+	createModule  *connect.Client[v1.CreateModuleRequest, v1.CreateModuleResponse]
+	getModule     *connect.Client[v1.GetModuleRequest, v1.GetModuleResponse]
+	deleteModule  *connect.Client[v1.DeleteModuleRequest, v1.DeleteModuleResponse]
+	uploadVersion *connect.Client[v1.UploadVersionRequest, v1.UploadVersionResponse]
+	deleteVersion *connect.Client[v1.DeleteVersionRequest, v1.DeleteVersionResponse]
 }
 
 // GetUrl calls moarpb.v1.ModuleRegistryService.GetUrl.
-func (c *moduleRegistryServiceClient) GetUrl(ctx context.Context, req *connect.Request[moarpb.GetUrlRequest]) (*connect.Response[moarpb.GetUrlResponse], error) {
+func (c *moduleRegistryServiceClient) GetUrl(ctx context.Context, req *connect.Request[v1.GetUrlRequest]) (*connect.Response[v1.GetUrlResponse], error) {
 	return c.getUrl.CallUnary(ctx, req)
 }
 
 // CreateModule calls moarpb.v1.ModuleRegistryService.CreateModule.
-func (c *moduleRegistryServiceClient) CreateModule(ctx context.Context, req *connect.Request[moarpb.CreateModuleRequest]) (*connect.Response[moarpb.CreateModuleResponse], error) {
+func (c *moduleRegistryServiceClient) CreateModule(ctx context.Context, req *connect.Request[v1.CreateModuleRequest]) (*connect.Response[v1.CreateModuleResponse], error) {
 	return c.createModule.CallUnary(ctx, req)
 }
 
 // GetModule calls moarpb.v1.ModuleRegistryService.GetModule.
-func (c *moduleRegistryServiceClient) GetModule(ctx context.Context, req *connect.Request[moarpb.GetModuleRequest]) (*connect.Response[moarpb.GetModuleResponse], error) {
+func (c *moduleRegistryServiceClient) GetModule(ctx context.Context, req *connect.Request[v1.GetModuleRequest]) (*connect.Response[v1.GetModuleResponse], error) {
 	return c.getModule.CallUnary(ctx, req)
 }
 
 // DeleteModule calls moarpb.v1.ModuleRegistryService.DeleteModule.
-func (c *moduleRegistryServiceClient) DeleteModule(ctx context.Context, req *connect.Request[moarpb.DeleteModuleRequest]) (*connect.Response[moarpb.DeleteModuleResponse], error) {
+func (c *moduleRegistryServiceClient) DeleteModule(ctx context.Context, req *connect.Request[v1.DeleteModuleRequest]) (*connect.Response[v1.DeleteModuleResponse], error) {
 	return c.deleteModule.CallUnary(ctx, req)
 }
 
 // UploadVersion calls moarpb.v1.ModuleRegistryService.UploadVersion.
-func (c *moduleRegistryServiceClient) UploadVersion(ctx context.Context, req *connect.Request[moarpb.UploadVersionRequest]) (*connect.Response[moarpb.UploadVersionResponse], error) {
+func (c *moduleRegistryServiceClient) UploadVersion(ctx context.Context, req *connect.Request[v1.UploadVersionRequest]) (*connect.Response[v1.UploadVersionResponse], error) {
 	return c.uploadVersion.CallUnary(ctx, req)
 }
 
 // DeleteVersion calls moarpb.v1.ModuleRegistryService.DeleteVersion.
-func (c *moduleRegistryServiceClient) DeleteVersion(ctx context.Context, req *connect.Request[moarpb.DeleteVersionRequest]) (*connect.Response[moarpb.DeleteVersionResponse], error) {
+func (c *moduleRegistryServiceClient) DeleteVersion(ctx context.Context, req *connect.Request[v1.DeleteVersionRequest]) (*connect.Response[v1.DeleteVersionResponse], error) {
 	return c.deleteVersion.CallUnary(ctx, req)
 }
 
 // ModuleRegistryServiceHandler is an implementation of the moarpb.v1.ModuleRegistryService service.
 type ModuleRegistryServiceHandler interface {
-	GetUrl(context.Context, *connect.Request[moarpb.GetUrlRequest]) (*connect.Response[moarpb.GetUrlResponse], error)
-	CreateModule(context.Context, *connect.Request[moarpb.CreateModuleRequest]) (*connect.Response[moarpb.CreateModuleResponse], error)
-	GetModule(context.Context, *connect.Request[moarpb.GetModuleRequest]) (*connect.Response[moarpb.GetModuleResponse], error)
-	DeleteModule(context.Context, *connect.Request[moarpb.DeleteModuleRequest]) (*connect.Response[moarpb.DeleteModuleResponse], error)
-	UploadVersion(context.Context, *connect.Request[moarpb.UploadVersionRequest]) (*connect.Response[moarpb.UploadVersionResponse], error)
-	DeleteVersion(context.Context, *connect.Request[moarpb.DeleteVersionRequest]) (*connect.Response[moarpb.DeleteVersionResponse], error)
+	GetUrl(context.Context, *connect.Request[v1.GetUrlRequest]) (*connect.Response[v1.GetUrlResponse], error)
+	CreateModule(context.Context, *connect.Request[v1.CreateModuleRequest]) (*connect.Response[v1.CreateModuleResponse], error)
+	GetModule(context.Context, *connect.Request[v1.GetModuleRequest]) (*connect.Response[v1.GetModuleResponse], error)
+	DeleteModule(context.Context, *connect.Request[v1.DeleteModuleRequest]) (*connect.Response[v1.DeleteModuleResponse], error)
+	UploadVersion(context.Context, *connect.Request[v1.UploadVersionRequest]) (*connect.Response[v1.UploadVersionResponse], error)
+	DeleteVersion(context.Context, *connect.Request[v1.DeleteVersionRequest]) (*connect.Response[v1.DeleteVersionResponse], error)
 }
 
 // NewModuleRegistryServiceHandler builds an HTTP handler from the service implementation. It
@@ -239,26 +238,26 @@ func NewModuleRegistryServiceHandler(svc ModuleRegistryServiceHandler, opts ...c
 // UnimplementedModuleRegistryServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedModuleRegistryServiceHandler struct{}
 
-func (UnimplementedModuleRegistryServiceHandler) GetUrl(context.Context, *connect.Request[moarpb.GetUrlRequest]) (*connect.Response[moarpb.GetUrlResponse], error) {
+func (UnimplementedModuleRegistryServiceHandler) GetUrl(context.Context, *connect.Request[v1.GetUrlRequest]) (*connect.Response[v1.GetUrlResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("moarpb.v1.ModuleRegistryService.GetUrl is not implemented"))
 }
 
-func (UnimplementedModuleRegistryServiceHandler) CreateModule(context.Context, *connect.Request[moarpb.CreateModuleRequest]) (*connect.Response[moarpb.CreateModuleResponse], error) {
+func (UnimplementedModuleRegistryServiceHandler) CreateModule(context.Context, *connect.Request[v1.CreateModuleRequest]) (*connect.Response[v1.CreateModuleResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("moarpb.v1.ModuleRegistryService.CreateModule is not implemented"))
 }
 
-func (UnimplementedModuleRegistryServiceHandler) GetModule(context.Context, *connect.Request[moarpb.GetModuleRequest]) (*connect.Response[moarpb.GetModuleResponse], error) {
+func (UnimplementedModuleRegistryServiceHandler) GetModule(context.Context, *connect.Request[v1.GetModuleRequest]) (*connect.Response[v1.GetModuleResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("moarpb.v1.ModuleRegistryService.GetModule is not implemented"))
 }
 
-func (UnimplementedModuleRegistryServiceHandler) DeleteModule(context.Context, *connect.Request[moarpb.DeleteModuleRequest]) (*connect.Response[moarpb.DeleteModuleResponse], error) {
+func (UnimplementedModuleRegistryServiceHandler) DeleteModule(context.Context, *connect.Request[v1.DeleteModuleRequest]) (*connect.Response[v1.DeleteModuleResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("moarpb.v1.ModuleRegistryService.DeleteModule is not implemented"))
 }
 
-func (UnimplementedModuleRegistryServiceHandler) UploadVersion(context.Context, *connect.Request[moarpb.UploadVersionRequest]) (*connect.Response[moarpb.UploadVersionResponse], error) {
+func (UnimplementedModuleRegistryServiceHandler) UploadVersion(context.Context, *connect.Request[v1.UploadVersionRequest]) (*connect.Response[v1.UploadVersionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("moarpb.v1.ModuleRegistryService.UploadVersion is not implemented"))
 }
 
-func (UnimplementedModuleRegistryServiceHandler) DeleteVersion(context.Context, *connect.Request[moarpb.DeleteVersionRequest]) (*connect.Response[moarpb.DeleteVersionResponse], error) {
+func (UnimplementedModuleRegistryServiceHandler) DeleteVersion(context.Context, *connect.Request[v1.DeleteVersionRequest]) (*connect.Response[v1.DeleteVersionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("moarpb.v1.ModuleRegistryService.DeleteVersion is not implemented"))
 }

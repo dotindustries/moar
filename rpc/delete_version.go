@@ -8,7 +8,7 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/dotindustries/moar/internal/registry"
-	"github.com/dotindustries/moar/moarpb/v1"
+	moarpb "github.com/dotindustries/moar/moarpb/v1"
 )
 
 func (s *Server) DeleteVersion(ctx context.Context, c *connect.Request[moarpb.DeleteVersionRequest]) (*connect.Response[moarpb.DeleteVersionResponse], error) {

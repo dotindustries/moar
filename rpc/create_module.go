@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/dotindustries/moar/internal/registry"
-	"github.com/dotindustries/moar/moarpb/v1"
+	moarpb "github.com/dotindustries/moar/moarpb/v1"
 )
 
 func (s *Server) CreateModule(ctx context.Context, c *connect.Request[moarpb.CreateModuleRequest]) (*connect.Response[moarpb.CreateModuleResponse], error) {

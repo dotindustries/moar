@@ -1,0 +1,703 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "moar",
+    "description": "THIS IS FROM BASE!",
+    "version": "v1.0.0"
+  },
+  "paths": {
+    "/moarpb.v1.ModuleRegistryService/CreateModule": {
+      "post": {
+        "tags": [
+          "moarpb.v1.ModuleRegistryService"
+        ],
+        "description": "",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/moarpb.v1.ModuleRegistryService.CreateModule.moarpb.v1.CreateModuleRequest"
+        },
+        "responses": {
+          "default": {
+            "$ref": "#/components/responses/connect.error"
+          },
+          "200": {
+            "$ref": "#/components/responses/moarpb.v1.ModuleRegistryService.CreateModule.moarpb.v1.CreateModuleResponse"
+          }
+        }
+      }
+    },
+    "/moarpb.v1.ModuleRegistryService/DeleteModule": {
+      "post": {
+        "tags": [
+          "moarpb.v1.ModuleRegistryService"
+        ],
+        "description": "",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/moarpb.v1.ModuleRegistryService.DeleteModule.moarpb.v1.DeleteModuleRequest"
+        },
+        "responses": {
+          "default": {
+            "$ref": "#/components/responses/connect.error"
+          },
+          "200": {
+            "$ref": "#/components/responses/moarpb.v1.ModuleRegistryService.DeleteModule.moarpb.v1.DeleteModuleResponse"
+          }
+        }
+      }
+    },
+    "/moarpb.v1.ModuleRegistryService/DeleteVersion": {
+      "post": {
+        "tags": [
+          "moarpb.v1.ModuleRegistryService"
+        ],
+        "description": "",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/moarpb.v1.ModuleRegistryService.DeleteVersion.moarpb.v1.DeleteVersionRequest"
+        },
+        "responses": {
+          "default": {
+            "$ref": "#/components/responses/connect.error"
+          },
+          "200": {
+            "$ref": "#/components/responses/moarpb.v1.ModuleRegistryService.DeleteVersion.moarpb.v1.DeleteVersionResponse"
+          }
+        }
+      }
+    },
+    "/moarpb.v1.ModuleRegistryService/GetModule": {
+      "post": {
+        "tags": [
+          "moarpb.v1.ModuleRegistryService"
+        ],
+        "description": "",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/moarpb.v1.ModuleRegistryService.GetModule.moarpb.v1.GetModuleRequest"
+        },
+        "responses": {
+          "default": {
+            "$ref": "#/components/responses/connect.error"
+          },
+          "200": {
+            "$ref": "#/components/responses/moarpb.v1.ModuleRegistryService.GetModule.moarpb.v1.GetModuleResponse"
+          }
+        }
+      }
+    },
+    "/moarpb.v1.ModuleRegistryService/GetUrl": {
+      "post": {
+        "tags": [
+          "moarpb.v1.ModuleRegistryService"
+        ],
+        "description": "",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/moarpb.v1.ModuleRegistryService.GetUrl.moarpb.v1.GetUrlRequest"
+        },
+        "responses": {
+          "default": {
+            "$ref": "#/components/responses/connect.error"
+          },
+          "200": {
+            "$ref": "#/components/responses/moarpb.v1.ModuleRegistryService.GetUrl.moarpb.v1.GetUrlResponse"
+          }
+        }
+      }
+    },
+    "/moarpb.v1.ModuleRegistryService/UploadVersion": {
+      "post": {
+        "tags": [
+          "moarpb.v1.ModuleRegistryService"
+        ],
+        "description": "",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/moarpb.v1.ModuleRegistryService.UploadVersion.moarpb.v1.UploadVersionRequest"
+        },
+        "responses": {
+          "default": {
+            "$ref": "#/components/responses/connect.error"
+          },
+          "200": {
+            "$ref": "#/components/responses/moarpb.v1.ModuleRegistryService.UploadVersion.moarpb.v1.UploadVersionResponse"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "connect.error": {
+        "additionalProperties": false,
+        "description": "Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation",
+        "properties": {
+          "code": {
+            "description": "The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].",
+            "examples": [
+              "CodeNotFound"
+            ],
+            "enum": [
+              "CodeCanceled",
+              "CodeUnknown",
+              "CodeInvalidArgument",
+              "CodeDeadlineExceeded",
+              "CodeNotFound",
+              "CodeAlreadyExists",
+              "CodePermissionDenied",
+              "CodeResourceExhausted",
+              "CodeFailedPrecondition",
+              "CodeAborted",
+              "CodeOutOfRange",
+              "CodeInternal",
+              "CodeUnavailable",
+              "CodeDataLoss",
+              "CodeUnauthenticated"
+            ],
+            "type": "string"
+          },
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/google.protobuf.Any"
+            },
+            "type": "array"
+          },
+          "message": {
+            "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.",
+            "type": "string"
+          }
+        },
+        "title": "Connect Error",
+        "type": "object"
+      },
+      "google.protobuf.Any": {
+        "additionalProperties": true,
+        "description": "Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.",
+        "id": "google.protobuf.Any",
+        "properties": {
+          "@type": {
+            "description": "The type of the serialized message.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "moarpb.v1.CreateModuleRequest": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "author": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "author",
+            "type": "string"
+          },
+          "language": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "language",
+            "type": "string"
+          },
+          "moduleName": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "module_name",
+            "type": "string"
+          }
+        },
+        "title": "CreateModuleRequest",
+        "type": "object"
+      },
+      "moarpb.v1.CreateModuleResponse": {
+        "additionalProperties": false,
+        "description": "",
+        "title": "CreateModuleResponse",
+        "type": "object"
+      },
+      "moarpb.v1.DeleteModuleRequest": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "moduleName": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "module_name",
+            "type": "string"
+          }
+        },
+        "title": "DeleteModuleRequest",
+        "type": "object"
+      },
+      "moarpb.v1.DeleteModuleResponse": {
+        "additionalProperties": false,
+        "description": "",
+        "title": "DeleteModuleResponse",
+        "type": "object"
+      },
+      "moarpb.v1.DeleteVersionRequest": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "moduleName": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "module_name",
+            "type": "string"
+          },
+          "version": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "version",
+            "type": "string"
+          }
+        },
+        "title": "DeleteVersionRequest",
+        "type": "object"
+      },
+      "moarpb.v1.DeleteVersionResponse": {
+        "additionalProperties": false,
+        "description": "",
+        "title": "DeleteVersionResponse",
+        "type": "object"
+      },
+      "moarpb.v1.File": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "description": "",
+            "format": "byte",
+            "title": "data",
+            "type": "string"
+          },
+          "mimeType": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "mime_type",
+            "type": "string"
+          },
+          "name": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "name",
+            "type": "string"
+          }
+        },
+        "title": "File",
+        "type": "object"
+      },
+      "moarpb.v1.GetModuleRequest": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "moduleName": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "module_name",
+            "type": "string"
+          }
+        },
+        "title": "GetModuleRequest",
+        "type": "object"
+      },
+      "moarpb.v1.GetModuleResponse": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "module": {
+            "additionalProperties": false,
+            "description": "",
+            "items": {
+              "$ref": "#/components/schemas/moarpb.v1.Module",
+              "type": "object"
+            },
+            "title": "module",
+            "type": "array"
+          }
+        },
+        "title": "GetModuleResponse",
+        "type": "object"
+      },
+      "moarpb.v1.GetUrlRequest": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "moduleName": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "module_name",
+            "type": "string"
+          },
+          "version": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "version",
+            "type": "string"
+          },
+          "versionConstraint": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "version_constraint",
+            "type": "string"
+          }
+        },
+        "title": "GetUrlRequest",
+        "type": "object"
+      },
+      "moarpb.v1.GetUrlResponse": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "module": {
+            "$ref": "#/components/schemas/moarpb.v1.Module",
+            "additionalProperties": false,
+            "description": "",
+            "title": "module",
+            "type": "object"
+          },
+          "resources": {
+            "additionalProperties": false,
+            "description": "",
+            "items": {
+              "$ref": "#/components/schemas/moarpb.v1.VersionResource",
+              "type": "object"
+            },
+            "title": "resources",
+            "type": "array"
+          },
+          "selectedVersion": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "selected_version",
+            "type": "string"
+          }
+        },
+        "title": "GetUrlResponse",
+        "type": "object"
+      },
+      "moarpb.v1.Module": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "author": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "author",
+            "type": "string"
+          },
+          "language": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "language",
+            "type": "string"
+          },
+          "name": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "name",
+            "type": "string"
+          },
+          "versions": {
+            "additionalProperties": false,
+            "description": "",
+            "items": {
+              "$ref": "#/components/schemas/moarpb.v1.Version",
+              "type": "object"
+            },
+            "title": "versions",
+            "type": "array"
+          }
+        },
+        "title": "Module",
+        "type": "object"
+      },
+      "moarpb.v1.UploadVersionRequest": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "files": {
+            "additionalProperties": false,
+            "description": "",
+            "items": {
+              "$ref": "#/components/schemas/moarpb.v1.File",
+              "type": "object"
+            },
+            "title": "files",
+            "type": "array"
+          },
+          "moduleName": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "module_name",
+            "type": "string"
+          },
+          "version": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "version",
+            "type": "string"
+          }
+        },
+        "title": "UploadVersionRequest",
+        "type": "object"
+      },
+      "moarpb.v1.UploadVersionResponse": {
+        "additionalProperties": false,
+        "description": "",
+        "title": "UploadVersionResponse",
+        "type": "object"
+      },
+      "moarpb.v1.Version": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "files": {
+            "additionalProperties": false,
+            "description": "",
+            "items": {
+              "$ref": "#/components/schemas/moarpb.v1.File",
+              "type": "object"
+            },
+            "title": "files",
+            "type": "array"
+          },
+          "name": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "name",
+            "type": "string"
+          }
+        },
+        "title": "Version",
+        "type": "object"
+      },
+      "moarpb.v1.VersionResource": {
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "contentType": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "content_type",
+            "type": "string"
+          },
+          "name": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "name",
+            "type": "string"
+          },
+          "uri": {
+            "additionalProperties": false,
+            "description": "",
+            "title": "uri",
+            "type": "string"
+          }
+        },
+        "title": "VersionResource",
+        "type": "object"
+      }
+    },
+    "responses": {
+      "connect.error": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/connect.error"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/connect.error"
+            }
+          }
+        }
+      },
+      "moarpb.v1.ModuleRegistryService.CreateModule.moarpb.v1.CreateModuleResponse": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.CreateModuleResponse"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.CreateModuleResponse"
+            }
+          }
+        }
+      },
+      "moarpb.v1.ModuleRegistryService.DeleteModule.moarpb.v1.DeleteModuleResponse": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.DeleteModuleResponse"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.DeleteModuleResponse"
+            }
+          }
+        }
+      },
+      "moarpb.v1.ModuleRegistryService.DeleteVersion.moarpb.v1.DeleteVersionResponse": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.DeleteVersionResponse"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.DeleteVersionResponse"
+            }
+          }
+        }
+      },
+      "moarpb.v1.ModuleRegistryService.GetModule.moarpb.v1.GetModuleResponse": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.GetModuleResponse"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.GetModuleResponse"
+            }
+          }
+        }
+      },
+      "moarpb.v1.ModuleRegistryService.GetUrl.moarpb.v1.GetUrlResponse": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.GetUrlResponse"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.GetUrlResponse"
+            }
+          }
+        }
+      },
+      "moarpb.v1.ModuleRegistryService.UploadVersion.moarpb.v1.UploadVersionResponse": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.UploadVersionResponse"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.UploadVersionResponse"
+            }
+          }
+        }
+      }
+    },
+    "requestBodies": {
+      "moarpb.v1.ModuleRegistryService.CreateModule.moarpb.v1.CreateModuleRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.CreateModuleRequest"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.CreateModuleRequest"
+            }
+          }
+        },
+        "required": true
+      },
+      "moarpb.v1.ModuleRegistryService.DeleteModule.moarpb.v1.DeleteModuleRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.DeleteModuleRequest"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.DeleteModuleRequest"
+            }
+          }
+        },
+        "required": true
+      },
+      "moarpb.v1.ModuleRegistryService.DeleteVersion.moarpb.v1.DeleteVersionRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.DeleteVersionRequest"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.DeleteVersionRequest"
+            }
+          }
+        },
+        "required": true
+      },
+      "moarpb.v1.ModuleRegistryService.GetModule.moarpb.v1.GetModuleRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.GetModuleRequest"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.GetModuleRequest"
+            }
+          }
+        },
+        "required": true
+      },
+      "moarpb.v1.ModuleRegistryService.GetUrl.moarpb.v1.GetUrlRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.GetUrlRequest"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.GetUrlRequest"
+            }
+          }
+        },
+        "required": true
+      },
+      "moarpb.v1.ModuleRegistryService.UploadVersion.moarpb.v1.UploadVersionRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.UploadVersionRequest"
+            }
+          },
+          "application/proto": {
+            "schema": {
+              "$ref": "#/components/schemas/moarpb.v1.UploadVersionRequest"
+            }
+          }
+        },
+        "required": true
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "moarpb.v1.ModuleRegistryService",
+      "description": ""
+    }
+  ]
+}

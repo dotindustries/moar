@@ -4,7 +4,7 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"fmt"
-	"github.com/dotindustries/moar/moarpb/v1/moarpbconnect"
+	"github.com/dotindustries/moar/moarpb/v1/v1connect"
 	"io/ioutil"
 	"mime"
 	"os"
@@ -13,7 +13,7 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/dotindustries/moar/client"
-	"github.com/dotindustries/moar/moarpb/v1"
+	moarpb "github.com/dotindustries/moar/moarpb/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -111,7 +111,7 @@ func MustReadFileBytes(path string) []byte {
 	return bytes
 }
 
-func protobufClient() moarpbconnect.ModuleRegistryServiceClient {
+func protobufClient() v1connect.ModuleRegistryServiceClient {
 	return client.New(client.Config{Url: backendAddr})
 }
 
