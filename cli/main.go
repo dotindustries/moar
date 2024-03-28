@@ -14,8 +14,28 @@
 
 package main
 
-import "github.com/dotindustries/moar/cli/cmd"
+import (
+	"fmt"
+	"github.com/dotindustries/moar/cli/cmd"
+	"os"
+)
+
+// Version and CommitHash set in compile time through ldflags
+// Will be passed down to cli package
+var (
+	Version    = "dev"
+	CommitHash = "-"
+)
 
 func main() {
-	cmd.Execute()
+	// Pass down version and commit hash
+	cmd.Version = cmd.VersionInfo{
+		Version: Version,
+		Commit:  CommitHash,
+	}
+
+	if err := cmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
