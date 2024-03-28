@@ -33,6 +33,7 @@ jobs:
           MINIO_ROOT_PASSWORD: minio123
         ports:
           - 9000:9000
+      # todo: we also need to add our local code changed service to be built...
     steps:
       - name: Checkout
         uses: actions/checkout@master
