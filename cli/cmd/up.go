@@ -67,7 +67,11 @@ var upCmd = &cobra.Command{
 			e.Use(nrecho.Middleware(app))
 		}
 
-		path, handler := v1connect.NewModuleRegistryServiceHandler(server, connect.WithInterceptors(auth.ApiKeyInterceptor))
+		var interceptors []connect.Interceptor
+		if GlobalConfig.AuthEnabled {
+			interceptors = append(interceptors, auth.ApiKeyInterceptor)
+		}
+		path, handler := v1connect.NewModuleRegistryServiceHandler(server, connect.WithInterceptors(interceptors...))
 		loggingHandler := handlers.CombinedLoggingHandler(os.Stdout, handler)
 		e.POST(path+"*", echo.WrapHandler(loggingHandler))
 		e.GET("/", func(c echo.Context) error {
