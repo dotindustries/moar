@@ -19,4 +19,4 @@ wait_for_url () {
 }
 
 echo "Starting moar instance to be ready"
-wait_for_url 'http://localhost:8000/' 60
+wait_for_url 'http://app:8000/' 60

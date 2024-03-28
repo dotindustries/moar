@@ -1,3 +1,3 @@
-GET http://localhost:8000/
+GET http://app:8000/
 HTTP 200
 Content-Type: application/json
