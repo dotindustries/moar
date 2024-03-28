@@ -1,0 +1,28 @@
+meta {
+  name: Stats
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host}}/stats
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}
+
+tests {
+  test("success", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("should get state data", function() {
+    const data = res.getBody();
+    expect(data.uptime).to.be.a('string');
+    expect(data.requestCount).to.be.a('number');
+    expect(data.statuses).to.be.a('object');
+  });
+}

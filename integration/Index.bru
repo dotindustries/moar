@@ -1,0 +1,21 @@
+meta {
+  name: Index
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}
+
+tests {
+  test("service is up", function() {
+    expect(res.status).to.equal(200);
+  });
+}

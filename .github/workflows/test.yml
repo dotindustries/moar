@@ -1,25 +1,46 @@
 on: [push, pull_request]
 name: Test
 jobs:
-  test:
+  unit-test:
     strategy:
       matrix:
         # [1.15.x, 1.16.x]
         go-version: [1.21.x]
-        # os: [ubuntu-latest, macos-latest, windows-latest]
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@master
       - name: Install Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@master
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Test
-        run: go test ./...
-      - name: Integration test
-        run: |
-          curl --location --remote-name https://github.com/Orange-OpenSource/hurl/releases/download/4.2.0/hurl_4.2.0_amd64.deb
-          sudo apt update && sudo apt install ./hurl_4.2.0_amd64.deb
-          integration/run.sh
+      - name: Unit tests
+        run: go test -race ./...
+  integration-tests:
+    name: Integration tests
+    strategy:
+      matrix:
+        # [1.15.x, 1.16.x]
+        go-version: [ 1.21.x ]
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+    services:
+      minio1:
+        image: quay.io/minio/minio
+        env:
+          MINIO_ROOT_USER: minio
+          MINIO_ROOT_PASSWORD: minio123
+        ports:
+          - 9000:9000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Setup Go
+        uses: actions/setup-go@master
+      - name: Setup Node
+        uses: actions/setup-node@master
+      - name: Install bruno
+        run: npm install -g @usebruno/cli
+      - name: Run tests
+        run: cd integration && bru run --env local
