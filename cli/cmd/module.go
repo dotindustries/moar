@@ -3,7 +3,9 @@ package cmd
 import (
 	"connectrpc.com/connect"
 	"context"
+	"errors"
 	"fmt"
+	"github.com/sanity-io/litter"
 	"os"
 
 	moarpb "github.com/dotindustries/moar/moarpb/v1"
@@ -19,7 +21,7 @@ var moduleCmd = &cobra.Command{
 
 var getAll bool
 var getModuleCmd = &cobra.Command{
-	Use:     "get",
+	Use:     "get module_name",
 	Short:   "Get module details",
 	Aliases: []string{"g", "read", "r"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -30,13 +32,18 @@ var getModuleCmd = &cobra.Command{
 		if !getAll {
 			if len(args) < 1 {
 				fmt.Println("ERROR: module name not provided")
+				_ = cmd.Help()
 				os.Exit(1)
 			}
 			request.ModuleName = args[0]
 		}
 		rsp, err := client.GetModule(context.Background(), connect.NewRequest(request))
 		if err != nil {
-			fmt.Println("ERROR: ", err)
+			fmt.Println(connect.CodeOf(err))
+			if connectErr := new(connect.Error); errors.As(err, &connectErr) {
+				fmt.Println(connectErr.Message())
+				litter.Dump(connectErr.Details())
+			}
 			os.Exit(1)
 		}
 		response := rsp.Msg

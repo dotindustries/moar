@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	unkey "github.com/WilfredAlmeida/unkey-go/features"
 	"github.com/labstack/echo/v4"
 )
@@ -8,6 +9,9 @@ import (
 const ContextKey = "auth"
 
 func KeyValidator(key string, c echo.Context) (bool, error) {
+	if key == "" {
+		return false, errors.New("missing API key")
+	}
 	resp, err := unkey.KeyVerify(key)
 	if err != nil {
 		return false, err

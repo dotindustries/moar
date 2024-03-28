@@ -4,15 +4,12 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"fmt"
-	"github.com/dotindustries/moar/moarpb/v1/v1connect"
-	"io/ioutil"
 	"mime"
 	"os"
 	"path"
 	"strings"
 
 	"github.com/Masterminds/semver"
-	"github.com/dotindustries/moar/client"
 	moarpb "github.com/dotindustries/moar/moarpb/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -103,16 +100,12 @@ func parseFile(filepath string) (*moarpb.File, error) {
 }
 
 func MustReadFileBytes(path string) []byte {
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	return bytes
-}
-
-func protobufClient() v1connect.ModuleRegistryServiceClient {
-	return client.New(client.Config{Url: backendAddr})
 }
 
 func init() {

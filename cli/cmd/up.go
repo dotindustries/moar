@@ -45,14 +45,8 @@ var upCmd = &cobra.Command{
 		}
 		registry := registry.New(moduleStorage)
 
-		if reverseProxyAddr == "" {
-			reverseProxyAddr = os.Getenv("S3_PROXY_URL")
-			if reverseProxyAddr == "" {
-				reverseProxyAddr = defaultReverseProxyAddr
-			}
-		}
-		logrus.Infof("Using reverse proxy for content with address: %s", reverseProxyAddr)
-		server := rpc.NewServer(registry, reverseProxyAddr, rpc.Opts{
+		logrus.Infof("Using reverse proxy for content with address: %s", GlobalConfig.ReverseProxyAddr)
+		server := rpc.NewServer(registry, GlobalConfig.ReverseProxyAddr, rpc.Opts{
 			VersionOverwriteEnabled: versionOverwriteEnabled,
 		})
 
