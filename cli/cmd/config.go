@@ -31,6 +31,7 @@ func readGlobalConfig() {
 var defaultConfig = &config{
 	Debug:       false,
 	BackendAddr: "http://localhost:8000",
+	AuthEnabled: false,
 }
 
 // configInit must be called from the packages' init() func
@@ -47,7 +48,9 @@ type config struct {
 	ReverseProxyAddr string `mapstructure:"proxy" structs:"proxy" env:"MOAR_S3_PROXY_URL"`
 	BackendAddr      string `mapstructure:"addr" structs:"addr" env:"MOAR_BACKEND_ADDR"`
 	Debug            bool   `mapstructure:"debug" structs:"debug" env:"MOAR_DEBUG"`
+	AuthEnabled      bool   `mapstructure:"auth_enabled" structs:"auth_enabled" env:"MOAR_AUTH_ENABLED"`
 
+	// sensitive
 	AccessToken string `mapstructure:"access_token" structs:"access_token" env:"MOAR_ACCESS_TOKEN" conform:"redact"`
 }
 
@@ -58,6 +61,7 @@ func cliFlags() {
 	rootCmd.PersistentFlags().String("addr", defaultConfig.BackendAddr, "The backend service address")
 	rootCmd.PersistentFlags().StringP("proxy", "p", defaultConfig.ReverseProxyAddr, "The reverse proxy which is directed at the module storage.")
 	rootCmd.PersistentFlags().BoolP("debug", "d", defaultConfig.Debug, "Toggles whether debug logs are enabled")
+	rootCmd.PersistentFlags().Bool("auth_enabled", defaultConfig.AuthEnabled, "Whether the backend service should use authentication")
 	rootCmd.PersistentFlags().String("access_token", defaultConfig.AccessToken, "Access token")
 }
 
