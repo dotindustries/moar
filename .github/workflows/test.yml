@@ -20,6 +20,6 @@ jobs:
         run: go test ./...
       - name: Integration test
         run: |
-          curl --location --remote-name https://github.com/Orange-OpenSource/hurl/releases/download/$VERSION/hurl_4.2.0_amd64.deb
+          curl --location --remote-name https://github.com/Orange-OpenSource/hurl/releases/download/4.2.0/hurl_4.2.0_amd64.deb
           sudo apt update && sudo apt install ./hurl_4.2.0_amd64.deb
           integration/run.sh
