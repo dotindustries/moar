@@ -35,6 +35,6 @@ jobs:
       - name: Install bruno
         run: npm install -g @usebruno/cli
       - name: Setup docker env
-        run: sh integration/setup_env.sh && cd integration && bru run --env local
-#      - name: Run tests
-#        run: cd integration && bru run --env local
+        run: sh integration/setup_env.sh
+      - name: Run tests
+        run: cd integration && bru run --env local
