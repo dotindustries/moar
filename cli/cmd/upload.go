@@ -39,6 +39,7 @@ var (
 			ver, err := semver.NewVersion(version)
 			if err != nil {
 				fmt.Println(err, ":", version)
+				_ = cmd.Help()
 				os.Exit(5)
 			}
 
