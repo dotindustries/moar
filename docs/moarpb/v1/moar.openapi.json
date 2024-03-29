@@ -5,6 +5,12 @@
     "description": "moar (pronounce \"more\") is a modular augmentation registry for VueJS and ReactJS.",
     "version": "v1.0.0"
   },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "local"
+    }
+  ],
   "paths": {
     "/moarpb.v1.ModuleRegistryService/CreateModule": {
       "post": {

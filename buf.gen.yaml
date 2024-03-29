@@ -11,3 +11,15 @@ plugins:
     opt:
       - format=json
       - base=docs/swagger.base.yaml
+  # This will invoke protoc-gen-es and write output to src/gen
+  - plugin: buf.build/bufbuild/es:v1.8.0
+    out: src/gen
+    opt:
+      # Add more plugin options here
+      - target=ts
+  # This will invoke protoc-gen-connect-es
+  - plugin: buf.build/connectrpc/es:v1.4.0
+    out: src/gen
+    opt:
+      # Add more plugin options here
+      - target=ts
