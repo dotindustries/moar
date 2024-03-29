@@ -29,9 +29,10 @@ func readGlobalConfig() {
 }
 
 var defaultConfig = &config{
-	Debug:       false,
-	BackendAddr: "http://localhost:8000",
-	AuthEnabled: false,
+	Debug:            false,
+	BackendAddr:      "http://localhost:8000",
+	AuthEnabled:      false,
+	ReverseProxyAddr: "http://localhost:9000",
 }
 
 // configInit must be called from the packages' init() func
