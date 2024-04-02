@@ -26,7 +26,7 @@ func (s *Server) UploadVersion(ctx context.Context, c *connect.Request[moarpb.Up
 	}
 
 	if module.HasVersion(newVersion) && !s.versionOverwriteEnabled {
-		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("version: overwrite disabled: version already exists"))
+		return nil, connect.NewError(connect.CodeAlreadyExists, fmt.Errorf("version: overwrite disabled: version already exists"))
 	}
 	var files []internal.File
 	for _, file := range request.Files {
