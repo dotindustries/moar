@@ -60,8 +60,8 @@ func (s *Server) GetUrl(ctx context.Context, c *connect.Request[moarpb.GetUrlReq
 		selectedVersionString = version.Version().String()
 	default:
 		version = module.Latest()
-		selectedVersionString = "latest"
 		s.logger.Debugf("Module (%s) version is not specified in query, defaulting to latest", request.ModuleName)
+		selectedVersionString = version.Value
 	}
 
 	var resources []*moarpb.VersionResource

@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 	"strings"
@@ -127,12 +127,14 @@ func (s *Storage) ModuleResources(ctx context.Context, module string, version st
 		Recursive: true,
 	}) {
 		var bts []byte
-		if loadData {
+		// always load meta.json as basic support for piral framework
+		//  to avoid a second network call to get meta.json content per module
+		if loadData || strings.HasSuffix(object.Key, "meta.json") {
 			obj, err := s.minioClient.GetObject(ctx, s.bucket, object.Key, minio.GetObjectOptions{})
 			if err != nil {
 				return nil, err
 			}
-			bts, err = ioutil.ReadAll(obj)
+			bts, err = io.ReadAll(obj)
 			if err != nil {
 				errResp := minio.ToErrorResponse(err)
 				if errResp.Code == "NoSuchKey" {
@@ -188,8 +190,7 @@ func (s *Storage) loadModule(ctx context.Context, objectName string, loadData bo
 	if err != nil {
 		return nil, err
 	}
-	var module = &internal.Module{}
-	bts, err := ioutil.ReadAll(manifestObj)
+	bts, err := io.ReadAll(manifestObj)
 	if err != nil {
 		errResp := minio.ToErrorResponse(err)
 		if errResp.Code == "NoSuchKey" {
@@ -197,12 +198,10 @@ func (s *Storage) loadModule(ctx context.Context, objectName string, loadData bo
 		}
 		return nil, err
 	}
-	err = json.Unmarshal(bts, module)
+	module, err := internal.FromBytes(bts)
 	if err != nil {
 		return nil, err
 	}
-	// FIXME: remove this hardcoded dependency MUST be called first after unmarshaling
-	module.Init()
 	// load available resources
 	for _, version := range module.Versions {
 		version.Files, _ = s.ModuleResources(ctx, module.Name, version.Version().String(), loadData)
