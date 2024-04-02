@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 
@@ -14,6 +15,22 @@ type Module struct {
 	Versions        []*Version `json:"versions,omitempty"`
 	Language        string     `json:"language,omitempty"`
 	selectedVersion *Version
+}
+
+func FromBytes(bts []byte) (*Module, error) {
+	module := &Module{}
+	err := json.Unmarshal(bts, module)
+	if err != nil {
+		return nil, err
+	}
+	module.Init()
+	return module, nil
+}
+
+func (m *Module) Init() {
+	for _, version := range m.Versions {
+		version.Init()
+	}
 }
 
 // Prints the module name and its version selector
@@ -43,7 +60,7 @@ func (m *Module) HasVersion(version *semver.Version) bool {
 	return false
 }
 
-//VersionStrings serializes the versions to string
+// VersionStrings serializes the versions to string
 func (m *Module) VersionStrings() []string {
 	l := make([]string, len(m.Versions))
 	for i, v := range m.Versions {
@@ -52,7 +69,7 @@ func (m *Module) VersionStrings() []string {
 	return l
 }
 
-//SelectVersion selects the highest version number which matches constraint
+// SelectVersion selects the highest version number which matches constraint
 func (m *Module) SelectVersion(constraint *semver.Constraints) *Version {
 	// descending sort of versions
 	sort.SliceStable(m.Versions, func(i, j int) bool { return m.Versions[i].Version().GreaterThan(m.Versions[j].Version()) })
@@ -89,10 +106,4 @@ func (m *Module) Latest() *Version {
 	}
 	sort.SliceStable(m.Versions, func(i, j int) bool { return m.Versions[i].Version().GreaterThan(m.Versions[j].Version()) })
 	return m.Versions[0]
-}
-
-func (m *Module) Init() {
-	for _, version := range m.Versions {
-		version.Init()
-	}
 }
